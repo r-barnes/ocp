@@ -1,0 +1,101 @@
+/*
+C. Buskens and H. Maurer, 
+Sensitivity Analysis and Real-Time Control of
+Nonlinear Optimal Control Systems via
+Nonlinear Programming Methods,
+International Series of Numerical Mathematics,
+Vol.124, pp. 185--195, 1998.
+*/
+
+double x1, x2, x3, x4, u1, p1;
+double rl, vr, ua, d0, m, g;
+double Cd, Cd0, rk, rho, s, xa0, uam, r, q;
+double Tf;
+input_file = "ex79a.data";
+output_file = "ex79b.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 4;
+n_inequality = 2;
+n_terminal = 3;
+n_nodes = 201;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+//runge_kutta_method = RadauIIA5;
+
+//control_type = CUBIC;
+//control_type = LINEAR;
+
+Cd0 = 0.034;
+rk = 0.069662;
+s = 14.0;
+rho = 1.13;
+g = 9.80665;
+r = 100.0;
+xa0 = 350.0;
+uam = 2.5;
+m = 100.0;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	Gamma(1) = x1;
+	Gamma(2) = x2 - 1000.0;;
+	Gamma(3) = x3 - 13.2275675;
+	Gamma(4) = x4 + 1.28750052;
+}
+
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	u1 = u(1);
+	p1 = p(1);
+	
+	Tf = 100.0 + p1;
+	q = (x1 - xa0) / r;
+	q *= q;
+	ua = uam * exp(-q) * (1 - q);
+	vr = sqrt(x3*x3 + (x4-ua)*(x4-ua));
+	Cd = Cd0 + rk * u1 * u1;
+	d0 = 0.5 * Cd * rho * s * vr * vr;
+	rl = 0.5 * u1 * rho * s * vr * vr;
+	
+	F(1) = x3 * Tf;
+	F(2) = x4 * Tf;
+	F(3) = (Tf / m) * (-rl * (x4 - ua) / vr - d0 * x3 / vr);
+	F(4) = (Tf / m) * (rl * x3 / vr - d0 * (x4 - ua) / vr - m * g);
+}
+
+inequality_constraint {
+        u1 = u(1);
+        d(1) = u1 - 1.4;
+        d(2) = -1.4-u1;
+}
+
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	Psi(1) = x2 - 900.0;
+	Psi(2) = x3 - 13.2275675;
+	Psi(3) = x4 + 1.28750052;
+	phi = -x1;
+}
+
+solution_estimate {
+        y0(1) = 0.0;
+        y0(2) = 1000.0;
+        y0(3) = 13.2275675;
+        y0(4) = -1.28750052;
+        p0(1) = 0;
+        int i;
+        for (i = 1; i < n_nodes; i++)
+            u0(1,i) = 1.0;
+}

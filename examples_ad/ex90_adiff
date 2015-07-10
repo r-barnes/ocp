@@ -1,0 +1,46 @@
+/*
+C. Buskens and H. Maurer, 
+Sensitivity Analysis and Real-Time Control of
+Nonlinear Optimal Control Systems via
+Nonlinear Programming Methods,
+International Series of Numerical Mathematics,
+Vol.124, pp. 185--195, 1998.
+*/
+output_file = "ex90.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 2;
+n_terminal = 2;
+n_nodes = 101; 
+initial_time = 0.0;
+final_time = 4.5;
+//control_type = CONSTANT;
+
+initial_constraint {
+	Gamma(1) = y(1) + 5.0;
+	Gamma(2) = y(2) + 5.0;
+}
+
+dynamic_equation_and_cost_function {
+	double P0 = 0.14;
+	F(1) = y(2);
+	F(2) = -y(1) + y(2)*(1.4-P0*y(2)*y(2)) + 4.0*u(1);
+	L = y(1)*y(1) + u(1)*u(1);
+}
+
+inequality_constraint {
+	d(1) = u(1) - 1.0;
+	d(2) = -1.0 - u(1);
+}
+
+terminal_condition {
+	Psi(1) = y(1);
+	Psi(2) = y(2);
+}
+
+solution_estimate {
+	y0(1) = -5.0;
+	y0(2) = -5.0;
+}

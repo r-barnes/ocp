@@ -1,0 +1,115 @@
+/*
+Agrawal, S. K. and Fabien, B. C.,\  {\it Optimization of Dynamic Systems},
+Kluwer Academic Publishers, 1999.
+*/
+ADiff x1;
+ADiff x2;
+ADiff x3;
+ADiff x4;
+ADiff x5;
+ADiff x6;
+ADiff u1;
+ADiff u2;
+ADiff u3;
+ADiff u4;
+ADiff p1;
+double Mass;
+double D;
+double Le;
+double In;
+double cpi;
+ADiff s5;
+ADiff c5;
+input_file = "ex21.data";
+output_file = "ex22.data";
+n_states = 6;
+n_controls = 4;
+n_parameters = 1;
+n_initial = 6;
+n_inequality = 9;
+n_terminal = 6;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+//runge_kutta_method = 3;
+maximum_iterations = 2000;
+//maximum_remesh = 5;
+
+Mass=10;D=5;Le=5;In=12;cpi=3.141592654;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	p1 = p(1);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+	Gamma(3)=x3;
+	Gamma(4)=x4;
+	Gamma(5)=x5;
+	Gamma(6)=x6;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	u1 = u(1);
+	u2 = u(2);
+	u3 = u(3);
+	u4 = u(4);
+	p1 = p(1);
+	s5=sin(x5);
+	c5=cos(x5);
+	F(1)=x2*(p1+10.0);
+	F(2)=(p1+10.0)*((u1+u3)*c5-(u2+u4)*s5)/Mass;
+	F(3)=x4*(p1+10.0);
+	F(4)=(p1+10)*((u1+u3)*s5+(u2+u4)*c5)/Mass;
+	F(5)=(p1+10.0)*x6;
+	F(6)=(p1+10.0)*((u1+u3)*D-(u2+u4)*Le)/In;
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	u1 = u(1);
+	u2 = u(2);
+	u3 = u(3);
+	u4 = u(4);
+	p1 = p(1);
+	d(1)=-(p1+10.0);
+	d(2)=u1-5.0;
+	d(3)=-5.0-u1;
+	d(4)=u2-5.0;
+	d(5)=-5.0-u2;
+	d(6)=u3-5.0;
+	d(7)=-5.0-u3;
+	d(8)=u4-5.0;
+	d(9)=-5.0-u4;
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	p1 = p(1);
+	Psi(1)=x1-4.0;
+	Psi(2)=x2;
+	Psi(3)=x3-4.0;
+	Psi(4)=x4;
+	Psi(5)=x5-cpi/4.0;
+	Psi(6)=x6;
+	phi=(p1+10.0);
+}

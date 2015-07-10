@@ -1,0 +1,36 @@
+
+output_file = "exmiele3.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 2;
+n_inequality = 0;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+//control_type = CONSTANT;
+
+initial_constraint {
+    Gamma(1) = y(1);
+    Gamma(2) = y(2);
+}
+dynamic_equation_and_cost_function {
+    F(1) = p(1)*u(1);
+    F(2) = p(1)*(u(1)*u(1)-y(1)*y(1));
+    L = p(1);
+}
+terminal_condition {
+	Psi(1) = y(1) - 1;
+	Psi(2) = y(2);
+}
+solution_estimate {
+    p0(1) = 10.0;
+	y0(1) = 0.0;
+	y0(2) = 0.0;
+	int i;
+	for (i = 1; i <= n_nodes; i++) {
+	    u0(1,i) = 1.0;
+	}
+}

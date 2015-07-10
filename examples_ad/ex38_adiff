@@ -1,0 +1,98 @@
+/*
+Jung, E, Lenhart, S and Feng, Z.,
+Optimal Control of Treatments in a Two-Strain Tuberculosis Model,
+{\it Discrete and Continuous Dynamical Systems-Series B},
+Vol. 2, pp. 473--482, 2002.
+*/
+ADiff S;
+ADiff L1;
+ADiff I1;
+ADiff L2;
+ADiff I2;
+ADiff T;
+ADiff u1;
+ADiff u2;
+
+double b1;
+double b2;
+double bs;
+double mu;
+double d1;
+double d2;
+double k1;
+double k2;
+double r1;
+double r2;
+double pp;
+double q;
+double N;
+double G;
+double B1;
+double B2;
+output_file = "ex38.data";
+n_states = 6;
+n_controls = 2;
+n_parameters = 0;
+n_initial = 6;
+n_inequality = 4;
+n_terminal = 0;
+n_nodes = 51;
+initial_time = 0.0;
+final_time = 5.0;
+tolerance = 1.0e-6;
+b1=13.0;b2=13.0;bs=0.029;mu=0.0143;d1=0.0;d2=0.0;k1=0.5;k2=1.0;r1=2.0;r2=1.0;pp=0.4;q=0.1;B1=50.0;B2=500.0;N=30000.0;G=mu*N;
+initial_constraint {
+	S = y(1);
+	L1 = y(2);
+	I1 = y(3);
+	L2 = y(4);
+	I2 = y(5);
+	T = y(6);
+	Gamma(1)=S-(76.0/120.0)*N;
+	Gamma(2)=L1-(36.0/120.0)*N;
+	Gamma(3)=I1-(4.0/120.0)*N;
+	Gamma(4)=L2-(2.0/120.0)*N;
+	Gamma(5)=I2-(1.0/120.0)*N;
+	Gamma(6)=T-(1.0/120.)*N;
+}
+dynamic_equation_and_cost_function {
+	S = y(1);
+	L1 = y(2);
+	I1 = y(3);
+	L2 = y(4);
+	I2 = y(5);
+	T = y(6);
+	u1 = u(1);
+	u2 = u(2);
+	F(1)=G-b1*S*I1/N-bs*S*I2/N-mu*S;
+	F(2)=b1*S*I1/N-(mu+k1)*L1-u1*r1*L1+(1-u2)*pp*r2*I1+b2*T*I1/N-bs*L1*I2/N;
+	F(3)=k1*L1-(mu+d1)*I1-r2*I1;
+	F(4)=(1-u2)*q*r2*I1-(mu+k2)*L2+bs*(S+L1+T)*I2/N;
+	F(5)=k2*L2-(mu+d2)*I2;
+	F(6)=u1*r1*L1+(1-(1-u2)*(pp+q))*r2*I1-b2*T*I1/N-bs*T*I2/N-mu*T;
+	L=L2+I2+B1*u1*u1/2.0+B2*u2*u2/2.0;
+}
+inequality_constraint {
+	S = y(1);
+	L1 = y(2);
+	I1 = y(3);
+	L2 = y(4);
+	I2 = y(5);
+	T = y(6);
+	u1 = u(1);
+	u2 = u(2);
+	d(1)=u1-0.95;
+	d(2)=0.05-u1;
+	d(3)=u2-0.95;
+	d(4)=0.05-u2;
+}
+terminal_condition {
+}
+solution_estimate {
+	y0(1)=(76.0/120.0)*N;
+	y0(2)=(36.0/120.0)*N;
+	y0(3)=(4.0/120.0)*N;
+	y0(4)=(2.0/120.0)*N;
+	y0(5)=(1.0/120.0)*N;
+	y0(6)=(1.0/120.)*N;
+}

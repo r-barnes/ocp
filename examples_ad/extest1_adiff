@@ -1,0 +1,54 @@
+ 
+/*
+min J = int_0^2 u(t)^2 dt
+
+subject to
+
+y_dot = A*exp(alpha*t)*u(t)
+
+y(0) = 0
+y(2) = 2
+
+A = 1, alpha = 2
+
+Exact solution:
+
+C0 = exp(4*alpha) - 1
+y(t) = (2/C0)*(exp(2*alpha*t-1)
+u(t) = 4*alpha*exp(alpha*t) / (A*C0)
+J = 8*alpha/(A*A*C0)
+
+*/
+
+
+double A = 1.0;
+double alpha = 2.0;
+
+//control_type = CONSTANT;
+//n_nodes = 6;
+//output_file = "extest1const6.data";
+
+output_file = "extest1.data";
+n_nodes = 81;
+n_states = 1;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 1;
+n_inequality = 0;
+n_terminal = 1;
+initial_time = 0.0;
+final_time = 2.0;
+tolerance = 1.0e-8;
+
+initial_constraint {
+	Gamma(1) = y(1);
+}
+
+dynamic_equation_and_cost_function {
+	F(1) = A*exp(alpha*t)*u(1);
+	L = u(1)*u(1);
+}
+
+terminal_condition {
+	Psi(1) = y(1) - 2.0;
+}

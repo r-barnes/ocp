@@ -1,0 +1,70 @@
+/*
+Lasdon, L. S., Waren, A. D.\ and Rice, R. K.,
+Interior penalty method for inequality constrained optimal control problems, 
+{\em  IEEE Trans. AC}, 
+Vol. 12,
+pp. 388--395, 1967.
+*/
+double x1;
+double x2;
+double x3;
+double u1;
+double p1;
+double cpi;
+double g;
+input_file = "ex14.data";
+output_file = "ex15.data";
+n_states = 3;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 3;
+n_inequality = 2;
+n_terminal = 1;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+cpi=3.141592653589793;
+g=-32.2;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	p1 = p(1);
+	Gamma(1)=x1;
+	Gamma(2)=x2-6.0;
+	Gamma(3)=x3-1.0;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	u1 = u(1);
+	p1 = p(1);
+	F(1)=x3*cos(u1)*(p1+1.0);
+	F(2)=x3*sin(u1)*(p1+1.0);
+	F(3)=g*sin(u1)*(p1+1.0);
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	u1 = u(1);
+	p1 = p(1);
+	d(1)=-(x2+0.5*x1-5.0);
+	d(2)=-(p1+1.0);
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	p1 = p(1);
+	phi=(p1+1.0);
+	Psi(1)=x1-6.0;
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=6.0;
+	y0(3)=1.0;
+}

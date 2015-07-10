@@ -1,0 +1,55 @@
+/*
+Betts, J. T., Biehn, N. and Campbell, S. L.,
+Convergence of nonconvergent IRK discretizations of optimal control problems 
+with state inequality constraints,
+{\it SIAM J. Sci. Comput.},
+pp. 1981--2007, 2002.
+*/
+ADiff x;
+ADiff v;
+ADiff tx;
+ADiff u1;
+output_file = "ex56.data";
+n_states = 3;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 3;
+n_inequality = 1;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 4.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x = y(1);
+	v = y(2);
+	tx = y(3);
+	Gamma(1)=x-5.0;
+	Gamma(2)=v;
+	Gamma(3)=tx;
+}
+dynamic_equation_and_cost_function {
+	x = y(1);
+	v = y(2);
+	tx = y(3);
+	u1 = u(1);
+	F(1)=v;
+	F(2)=u1;
+	F(3)=1.0;
+	L=x*x+1.0e-3*u1*u1;
+}
+inequality_constraint {
+	x = y(1);
+	v = y(2);
+	tx = y(3);
+	u1 = u(1);
+	d(1)=-(x-15.0+(tx-4.0)*(tx-4.0)*(tx-4.0)*(tx-4.0));
+}
+terminal_condition {
+}
+solution_estimate {
+	y0(1)=5.0;
+	y0(2)=0.0;
+	y0(3)=0.0;
+}

@@ -1,0 +1,56 @@
+/*
+Zhao, Y., Bryson, A. E. and Slattery, R.,
+Generalized gradient algorithm for trajectory optimization, 
+AIAA Journal of Guidance, Control and Dynamics, 
+Vol.  13,
+pp. 1166--1169, 1990.
+*/
+double x1;
+double x2;
+double u1;
+output_file = "ex4.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 2;
+n_terminal = 1;
+n_nodes = 101; 
+initial_time = 0.0;
+final_time = 1.0;
+//control_type = CONSTANT;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+}
+
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	F(1)=x2;
+	F(2)=u1;
+	L=-x2;
+}
+
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	d(1)=u1-1.0;
+	d(2)=-1.0-u1;
+}
+
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	Psi(1)=x2;
+}
+
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=0.0;
+}

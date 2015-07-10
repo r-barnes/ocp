@@ -1,0 +1,87 @@
+/*
+Agrawal, S. K. and Fabien, B. C.,\  {\it Optimization of Dynamic Systems},
+Kluwer Academic Publishers, 1999.
+*/
+double x1;
+double x2;
+double x3;
+double x4;
+double x5;
+double x6;
+double u1;
+double u2;
+double u3;
+double u4;
+double Mass;
+double D;
+double Le;
+double In;
+double cpi;
+double s5;
+double c5;
+output_file = "ex20.data";
+n_states = 6;
+n_controls = 4;
+n_parameters = 0;
+n_initial = 6;
+n_inequality = 0;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+//maximum_remesh = 0;
+
+Mass=10.0;
+D=5.0;
+Le=5.0;
+In=12.0;
+cpi=3.141592654;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+	Gamma(3)=x3;
+	Gamma(4)=x4;
+	Gamma(5)=x5;
+	Gamma(6)=x6;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	u1 = u(1);
+	u2 = u(2);
+	u3 = u(3);
+	u4 = u(4);
+	s5=sin(x5);
+	c5=cos(x5);
+	F(1)=10.0*x2;
+	F(2)=10.0*((u1+u3)*c5-(u2+u4)*s5)/Mass;
+	F(3)=10.0*x4;
+	F(4)=10.0*((u1+u3)*s5+(u2+u4)*c5)/Mass;
+	F(5)=10.0*x6;
+	F(6)=10.0*((u1+u3)*D-(u2+u4)*Le)/In;
+	L=0.5*(u1*u1+u2*u2+u3*u3+u4*u4);
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	Psi(1)=x1-4.0;
+	Psi(2)=x5;
+	phi=(x3-4.0)*(x3-4.0);
+}

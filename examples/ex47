@@ -1,0 +1,41 @@
+double x1;
+double x2;
+double u1;
+double pi;
+double p1;
+double g;
+double L1;
+double m;
+output_file = "ex47.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 0;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+p1=1.0;pi=3.141592654;g=9.81;L1=0.25;m=1.0;
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	F(1)=p1*x2;
+	F(2)=p1*(-(g/L1)*sin(x1)+u1/(m*L1*L1));
+	L=0.5*(u1*u1)+1.0e1*(x2*x2);
+
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	Psi(1)=x1-pi;
+	Psi(2)=x2;
+}

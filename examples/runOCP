@@ -1,0 +1,12 @@
+echo "$ Problem: $1"
+#echo "Form the c file ..."
+cat ../src/_ocp_template_c_ > $1OCP.c
+cat $1 >> $1OCP.c
+echo } >> $1OCP.c
+#echo "Compile and link ..."
+cc -O3 -Wall -o $1OCP.exe $1OCP.c ../lib/*.o -lc -lm
+#cc -g -Wall -o $1OCP.exe $1OCP.c ../lib/*.o -lc -lm
+#echo "Execute ..."
+./$1OCP.exe
+#rm $1OCP.c
+rm $1OCP.exe

@@ -1,0 +1,64 @@
+/*
+ Rosen, O. and Luus R.,
+ Global optimization approach to nonlinear optimal control,
+ {\it J. Optimization Theory and Applications},
+  Vol.73, pp. 547--562, 1992.
+*/
+double x1;
+double x2;
+double x3;
+double tx;
+double u1;
+double beta;
+output_file = "ex53a.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 4;
+n_inequality = 2;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+beta=1.0;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	tx = y(4);
+	Gamma(1)=x1;
+	Gamma(2)=x2+1.0;
+	Gamma(3)=x3+sqrt(5.0);
+	Gamma(4)=tx;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	tx = y(4);
+	u1 = u(1);
+	F(1)=x2;
+	F(2)=-x3*u1+16.0*tx-8.0;
+	F(3)=u1;
+	F(4)=1.0;
+	L=beta*(x1*x1+x2*x2+0.0005*(x2+16.0*tx-8.0-0.1*x3*u1*u1)*(x2+16.0*tx-8.0-0.1*x3*u1*u1));
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	tx = y(4);
+	u1 = u(1);
+	d(1)=-4.0-u1;
+	d(2)=u1-10.0;
+}
+terminal_condition {
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=-1.0;
+	y0(3)=-sqrt(5.0);
+	y0(4)=0.0;
+}

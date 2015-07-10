@@ -1,0 +1,169 @@
+/*
+Buskens, C. and  Maurer, H.,
+SQP-methods for solving optimal control problems with control 
+and state constraints: adjoint variables, sensitivity analysis and 
+real-time control,
+{\it Journal of Computational and Applied Mathematics},
+Vol. 120, 
+pp. 85--108, 2000.
+*/
+ADiff x1;
+ADiff x2;
+ADiff x3;
+ADiff x4;
+ADiff x5;
+ADiff x6;
+ADiff x7;
+ADiff x8;
+ADiff x9;
+ADiff x10;
+ADiff u1;
+ADiff u2;
+ADiff u3;
+ADiff u4;
+double uxmax;
+double uzmax;
+double cx;
+double cz;
+double rx1;
+ADiff rx;
+ADiff rz;
+ADiff d1;
+ADiff d2;
+input_file = "ex41.data";
+output_file = "ex42.data";
+n_states = 10;
+n_controls = 4;
+n_parameters = 0;
+n_initial = 10;
+n_inequality = 10;
+n_terminal = 10;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+pi=3.141592654;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	x7 = y(7);
+	x8 = y(8);
+	x9 = y(9);
+	x10 = y(10);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+	Gamma(3)=x3-0.02;
+	Gamma(4)=x4-pi/2.0;
+	Gamma(5)=x5-0.1;
+	Gamma(6)=x6+pi/4.0;
+	Gamma(7)=x7-1.0;
+	Gamma(8)=x8;
+	Gamma(9)=x9-0.5;
+	Gamma(10)=x10-0.1;
+
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	x7 = y(7);
+	x8 = y(8);
+	x9 = y(9);
+	x10 = y(10);
+	u1 = u(1);
+	u2 = u(2);
+	u3 = u(3);
+	u4 = u(4);
+	uxmax=2.0;
+	uzmax=1.0;
+	cx=0.5;
+	cz=0.1;
+	rx=0.1;
+	d1=(x1-cx)/rx1;
+	d2=(x3-cz)/cz;
+	rx=-uxmax*exp(-d1*d1)*(x1-cx)*d2*d2;
+	rz=-uzmax*exp(-d1*d1)*d2*d2;
+	F(1)=cos(x6)*cos(x5)*x7+rx;
+	F(2)=sin(x6)*cos(x5)*x7;
+	F(3)=-sin(x5)*x7+rz;
+	F(4)=x8+sin(x4)*tan(x5)*x9+cos(x4)*tan(x5)*x10;
+	F(5)=cos(x4)*x9-sin(x4)*x10;
+	F(6)=(x9*sin(x4)+x10*cos(x4))/cos(x5);
+	F(7)=u1;
+	F(8)=u2;
+	F(9)=u3;
+	F(10)=u4;
+	L=u1*u1+u2*u2+u3*u3+u4*u4;
+
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	x7 = y(7);
+	x8 = y(8);
+	x9 = y(9);
+	x10 = y(10);
+	u1 = u(1);
+	u2 = u(2);
+	u3 = u(3);
+	u4 = u(4);
+	d(1)=u1-15.0;
+	d(2)=-15.0-u1;
+	d(3)=u2-15.0;
+	d(4)=-15.0-u2;
+	d(5)=u3-15.0;
+	d(6)=-15.0-u3;
+	d(7)=u4-15.0;
+	d(8)=-15.0-u4;
+	d(9)=x4-pi/2.0-0.02;
+	d(10)=-0.02-x4+pi/2.0;
+
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	x7 = y(7);
+	x8 = y(8);
+	x9 = y(9);
+	x10 = y(10);
+	Psi(1)=x1-1;
+	Psi(2)=x2-0.5;
+	Psi(3)=x3;
+	Psi(4)=x4-pi/2.0;
+	Psi(5)=x5;
+	Psi(6)=x6;
+	Psi(7)=x7;
+	Psi(8)=x8;
+	Psi(9)=x9;
+	Psi(10)=x10;
+
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=0.0;
+	y0(3)=0.02;
+	y0(4)=pi/2.0;
+	y0(5)=0.1;
+	y0(6)=-pi/4.0;
+	y0(7)=1.0;
+	y0(8)=0.0;
+	y0(9)=0.5;
+	y0(10)=0.1;
+
+}

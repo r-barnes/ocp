@@ -1,0 +1,69 @@
+/*
+Bryson, A. E.\ \& Ho, Y.,
+{\em Applied Optimal Control}, 
+Hemisphere, 
+1975.
+*/
+double x1;
+double x2;
+double u1;
+double p1;
+double cpi;
+double V;
+double h;
+input_file = "ex9.data";
+output_file = "ex10.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 2;
+n_inequality = 3;
+n_terminal = 2;
+n_nodes = 51;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+//control_type = CONSTANT;
+//maximum_remesh = 20;
+//maximum_nodes = 500;
+
+cpi=3.141592653589793;
+V=1.0;
+h=1.0;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	p1 = p(1);
+	Gamma(1)=x1-3.66;
+	Gamma(2)=x2+1.86;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	p1 = p(1);
+	F(1)=(V*cos(u1)-V*x2/h)*(p1+10.0);
+	F(2)=V*sin(u1)*(p1+10.0);
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	p1 = p(1);
+	d(1)=u1-cpi;
+	d(2)=-cpi-u1;
+	d(3)=-(p1+10.0);
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	p1 = p(1);
+	phi=(p1+10.0);
+	Psi(1)=x1;
+	Psi(2)=x2;
+}
+solution_estimate {
+	y0(1)=3.66;
+	y0(2)=-1.86;
+}

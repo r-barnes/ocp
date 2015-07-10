@@ -1,0 +1,61 @@
+/*
+Lewis, F. L., {\it Applied Optimal Control \& Estimation}, Prentice Hall, 1992. pp. 110
+*/
+double m, g, k, I, r0;
+double tx, t_dot, r, r_dot, tau;
+n_states = 4;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 4;
+n_inequality = 0;
+n_terminal = 4;
+n_nodes = 101;
+tolerance = 1.0e-6;
+initial_time = 0.0;
+final_time = 1.0;
+output_file = "ex49.data";
+
+m = 0.1;
+I = 0.01;
+g = 9.81;
+k = 2.0/5.0;
+r0 = 0.01;
+
+initial_constraint {
+    tx = y(1);
+    t_dot = y(2);
+    r = y(3);
+    r_dot = y(4);
+    Gamma(1) = tx;
+    Gamma(2) = t_dot;
+    Gamma(3) = r-r0;
+    Gamma(4) = r_dot;
+}
+
+dynamic_equation_and_cost_function {
+    tx = y(1);
+    t_dot = y(2);
+    r = y(3);
+    r_dot = y(4);
+    tau = u(1);
+    F(1) = t_dot;
+    F(2) = (-m*r*(2*r_dot*t_dot)+tau)/(m*r*r+I);
+    F(3) = r_dot;
+    F(4) = (r*t_dot*t_dot - g*sin(tx))/(1.0+k);
+    L = tau*tau/2.0;
+}
+
+terminal_condition {
+    tx = y(1);
+    t_dot = y(2);
+    r = y(3);
+    r_dot = y(4);
+    Psi(1) = r+r0;
+    Psi(2) = r_dot;
+    Psi(3) = tx;
+    Psi(4) = t_dot;
+}
+
+solution_estimate {
+    y0(3) = r0;
+}

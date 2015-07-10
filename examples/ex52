@@ -1,0 +1,46 @@
+/*
+Xing, A. Q., Chen, Z. H., Wang, C. L. and Yao, Y. Y.
+Exact penalty function approach to constrained optimal control problems
+Optimal Control Applications and Methods, Vol. 10 173-180, 1989
+*/
+double x1;
+double tx;
+double u1;
+output_file = "ex52.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 1;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x1 = y(1);
+	tx = y(2);
+	Gamma(1)=x1;
+	Gamma(2)=tx;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	tx = y(2);
+	u1 = u(1);
+	F(1)=u1;
+	F(2)=1.0;
+	L=x1*x1+u1*u1-2*u1;
+}
+inequality_constraint {
+	x1 = y(1);
+	tx = y(2);
+	u1 = u(1);
+	d(1)=-(x1*x1+u1*u1-tx*tx-1.0);
+}
+terminal_condition {
+	x1 = y(1);
+	tx = y(2);
+	phi=0.5*x1*x1;
+}
+

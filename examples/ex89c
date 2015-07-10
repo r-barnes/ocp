@@ -1,0 +1,89 @@
+/*
+
+*/
+n_states = 5;
+n_controls = 3;
+n_parameters = 1;
+n_initial = 3;
+n_inequality = 6;
+n_terminal = 3;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+input_file = "ex89b.data";
+output_file = "ex89c.data";
+//control_type = LINEAR; // CONSTANT;
+//nlp_method = LinfSQPmethod;
+//display = YES;
+
+initial_constraint {
+    Gamma(1) = y(1);
+	Gamma(2) = y(2);
+	Gamma(3) = y(3);
+}
+
+dynamic_equation_and_cost_function {
+	double tau = 1.0 + p(1);
+	F(1) = tau*u(1)*cos(y(4))*cos(y(5));
+	F(2) = tau*u(1)*cos(y(4))*sin(y(5));
+	F(3) = tau*u(1)*sin(y(4));
+	F(4) = tau*u(2);
+	F(5) = tau*u(3);
+}
+
+inequality_constraint {
+	double xd0 = 2.0;
+	double yd0 = 1.0;
+	double rd  = 1.0;
+	double xd = y(1) - xd0;
+	double yd = y(2) - yd0;
+	double delta_d = sqrt(xd*xd + yd*yd);
+	if (y(3) > 7.0) {
+		rd = 0.0;
+	}
+	d(1) = rd - delta_d;
+	
+	double xe0 = 8.0;
+	double ye0 = 8.0;
+	double re  = 2.0;
+	double xe = y(1) - xe0;
+	double ye = y(2) - ye0;
+	double delta_e = sqrt(xe*xe + ye*ye);
+	if (y(3) > 9.0) {
+		re = 0.0;
+	}
+	d(2) = re - delta_e;
+		
+	d(3) = -u(1); // 0 <= u1 <= 20
+	d(4) = u(1) - 20.0;
+	// -7 <= u3 <= 7
+	d(5) = -7.0 - u(3);
+	d(6) = u(3) - 7.0;
+
+	// -0.2 <= u2 <= 0.2
+	//d(7) = -0.2 - u(2);
+	//d(8) = u(2) - 0.2;
+}
+
+terminal_condition {
+	Psi(1) = y(1) - 10.0;
+	Psi(2) = y(2) - 10.0;
+	Psi(3) = y(3) - 10.0;
+	phi = 1.0 + p(1);
+}
+/*
+solution_estimate {
+	p0(1) = 0.0;
+	y0(1) = 0.0;
+	y0(2) = 0.0;
+	y0(3) = 0.0;
+	int i, j;
+	for (i = 1; i <= n_nodes; i++) {
+		for (j = 1; j <= n_controls; j++) {
+			u0(j,i) = 1.0;
+		}
+	}
+}
+*/
+

@@ -1,0 +1,60 @@
+/*
+Kirk, D. E., Optimal Control Theory: An Introduction, 
+Prentice-Hall, 1970. 
+*/
+ADiff x1;
+ADiff x2;
+ADiff u1;
+ADiff a1;
+ADiff a2;
+ADiff a3;
+ADiff a4;
+input_file = "ex7b.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 2;
+n_terminal = 2;
+n_nodes = 79;
+initial_time = 0.0;
+final_time = 0.78;
+tolerance = 1.0e-7;
+//control_type = CONSTANT;
+output_file = "ex8.data";
+//control_type = LINEAR;
+//output_file = "ex8linear.data";
+//control_type = CUBIC;
+//output_file = "ex8cubic.data";
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	Gamma(1)=x1-0.05;
+	Gamma(2)=x2;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	a1=x1+0.25;
+	a2=x2+0.5;
+	a3=x1+2.0;
+	a4=a2*exp(25.0*x1/a3);
+	F(1)=-2.0*a1+a4-a1*u1;
+	F(2)=0.5-x2-a4;
+	L=0.5*(x1*x1+x2*x2);
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	d(1)=u1-1.0;
+	d(2)=-1.0-u1;
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	Psi(1)=x1;
+	Psi(2)=x2;
+}
+

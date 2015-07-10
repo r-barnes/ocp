@@ -1,0 +1,50 @@
+double x1;
+double x2;
+double u1;
+double LL;
+output_file = "ex31.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 1;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+LL=0.12;
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	Gamma(1)=x1-1.0;
+	Gamma(2)=x2;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	F(1)=u1;
+	F(2)=x1;
+	L=0.5*u1*u1;
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	d(1)=x2-LL;
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	Psi(1)=x1+1.0;
+	Psi(2)=x2;
+}
+solution_estimate {
+	y0(1)=1.0;
+	y0(2)=0.0;
+	int i;
+	for (i = 1; i < n_nodes; i++) {
+		u0(1,i) = 0.1;
+	}
+}

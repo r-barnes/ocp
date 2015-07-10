@@ -1,0 +1,63 @@
+/*
+# Hartl, R., Sethi, S. and Vikson, R., A survey of the maximum principles
+# for optimal control problems with state constraints,
+# SIAM Review, Vol. 37, pp. 181--218, 1995
+
+StateVariables 			= [x];
+ControlVariables 		= [u];
+InitialConstraints 		= [x - 1];		   
+TerminalConstraints     = [x - 1];
+CostFunctional 			= u*u - 10*x*x;
+DifferentialEquations 	= [x*x - u];
+StateVariableInequalityConstraints   = [x - 1.5];
+InitialTime             = 0.0;
+FinalTime               = 1.0;
+
+Nodes					= 101;
+Tolerance				= 1.0e-6;
+
+OutputFile				= "ex105.data";
+MaximumNodes            = 5000;
+Display					= NO;
+MaximumNewtonIterations = 500;
+MaximumMeshRefinements  = 20;
+
+StateEstimate           = [1-t];
+ControlEstimate         = [0.1];
+
+*/
+
+output_file = "ex105.data";
+n_states = 1;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 1;
+n_inequality = 1;
+n_terminal = 1;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+control_type = CONSTANT;
+display = YES;
+
+initial_constraint {
+	Gamma(1) = y(1) - 1.0;
+}
+dynamic_equation_and_cost_function {
+	F(1) = y(1)*y(1) - u(1);
+	L = u(1)*u(1) - 10*y(1)*y(1);
+}
+inequality_constraint {
+    d(1) = y(1) - 1.5;
+}
+terminal_condition {
+    Psi(1) = y(1) - 1;
+}
+solution_estimate {
+	y0(1) = 0.1;
+	int i;
+	for (i = 1; i < n_nodes; i++) {
+		u0(1,i) = 0.1;
+	}
+}

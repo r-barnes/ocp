@@ -1,0 +1,44 @@
+/*
+Jacobson, D. H.\ and Lele, M. M.,
+A transformation technique for optimal control problems with state variable
+inequality constraints, 
+{\em  IEEE Trans. AC}, 
+Vol. 14,
+pp. 457--460, 1969.
+*/
+n_states     = 3;
+n_controls   = 1;
+n_initial    = 3;
+n_inequality = 3;
+n_nodes      = 101;
+initial_time = 0.0;
+final_time   = 1.0;
+output_file  = "ex6.data";
+tolerance = 1.0e-6;
+//control_type = LINEAR;
+//display = YES;
+//runge_kutta_method = Classical4_3;
+
+initial_constraint {
+        Gamma(1) = y(1);
+        Gamma(2) = y(2)+1.0;
+        Gamma(3) = y(3);
+}
+
+dynamic_equation_and_cost_function {
+        F(1) = y(2);
+        F(2) = -y(2) + u(1);
+        F(3) = 1.0;
+        L = y(1)*y(1) + y(2)*y(2) + 0.005*u(1)*u(1);
+}
+
+inequality_constraint {
+        d(1) = u(1)-20.0;
+        d(2) =-20.0-u(1);
+        d(3) =-(8.0*(y(3)-0.5)*(y(3)-0.5)-0.5-y(2));
+}
+
+solution_estimate {
+        y0(2) = -1.0;
+        // All other variables set to zero by default
+}

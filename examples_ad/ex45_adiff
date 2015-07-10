@@ -1,0 +1,58 @@
+/*
+Teo, K. L., Goh, C. J. and Wong, K. H.,
+{\em A unified computational approach to optimal control problems}, 
+Longman Scientific, 
+1991. 
+*/
+ADiff x;
+ADiff ya;
+ADiff ua;
+ADiff v;
+ADiff g;
+double a;
+double V;
+double y1;
+double pa;
+output_file = "ex45.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 4;
+n_inequality = 0;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+a=2.0;V=3.0;y1=5.0;pa=10.0;
+initial_constraint {
+	x = y(1);
+	ya = y(2);
+	ua = y(3);
+	v = y(4);
+	Gamma(1)=x;
+	Gamma(2)=ya;
+	Gamma(3)=ua;
+	Gamma(4)=v;
+}
+dynamic_equation_and_cost_function {
+	x = y(1);
+	ya = y(2);
+	ua = y(3);
+	v = y(4);
+	g = u(1);
+	F(1)=pa*ua;
+	F(2)=pa*v;
+	F(3)=pa*a*cos(g);
+	F(4)=pa*a*sin(g);
+	L=g*g/2.0;
+
+}
+terminal_condition {
+	x = y(1);
+	ya = y(2);
+	ua = y(3);
+	v = y(4);
+	phi=(ya-y1)*(ya-y1);
+
+}

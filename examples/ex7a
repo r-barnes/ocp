@@ -1,0 +1,56 @@
+/*
+Kirk, D. E.,
+{\em Optimal Control Theory: An Introduction}, 
+Prentice-Hall, 
+1970. 
+*/
+double x1;
+double x2;
+double u1;
+double a1;
+double a2;
+double a3;
+double a4;
+output_file = "ex7a.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 0;
+n_terminal = 0;
+n_nodes = 79;
+initial_time = 0.0;
+final_time = 0.78;
+tolerance = 1.0e-6;
+//maximum_remesh = 0;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	Gamma(1)=x1-0.05;
+	Gamma(2)=x2;
+
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	a1=x1+0.25;
+	a2=x2+0.5;
+	a3=x1+2.0;
+	a4=a2*exp(25.0*x1/a3);
+	F(1)=-2.0*a1+a4-a1*u1;
+	F(2)=0.5-x2-a4;
+	L=0.5*(x1*x1+x2*x2+0.1*u1*u1);
+
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	phi=x1*x1+x2*x2;
+
+}
+solution_estimate {
+	y0(1)=0.05;
+	y0(2)=0.0;
+}

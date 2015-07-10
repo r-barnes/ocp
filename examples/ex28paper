@@ -1,0 +1,95 @@
+/*
+Junkins, J. L., and Turner, J. D., Optimal Continuous Torque 
+Attitude Maneuvers, 
+{\it Journal of Guidance, Control, and Dynamics}, 
+Vol. 3, No. 3, pp. 210--217, 1980.
+*/
+double e1;
+double e2;
+double e3;
+double e4;
+double w1;
+double w2;
+double w3;
+double T1;
+double T2;
+double T3;
+double I1;
+double I2;
+double I3;
+double T1S;
+double T2S;
+double T3S;
+output_file = "ex28paper.data";
+n_states = 7;
+n_controls = 3;
+n_parameters = 0;
+n_initial = 7;
+n_inequality = 0;
+n_terminal = 0;
+n_nodes = 201;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+I1=1.0e6;
+I2=833333.0;
+I3=916667.0;
+T1S=100;
+T2S=100;
+T3S=100;
+initial_constraint {
+	e1 = y(1);
+	e2 = y(2);
+	e3 = y(3);
+	e4 = y(4);
+	w1 = y(5);
+	w2 = y(6);
+	w3 = y(7);
+	Gamma(1)=e1;
+	Gamma(2)=e2;
+	Gamma(3)=e3;
+	Gamma(4)=e4-1.0;
+	Gamma(5)=w1-0.01;
+	Gamma(6)=w2-0.005;
+	Gamma(7)=w3-0.001;
+}
+dynamic_equation_and_cost_function {
+	e1 = y(1);
+	e2 = y(2);
+	e3 = y(3);
+	e4 = y(4);
+	w1 = y(5);
+	w2 = y(6);
+	w3 = y(7);
+	T1 = u(1);
+	T2 = u(2);
+	T3 = u(3);
+	F(1)=0.5*(w1*e4-w2*e3+w3*e2)*100.0;
+	F(2)=0.5*(w1*e3+w2*e4-w3*e1)*100.0;
+	F(3)=0.5*(-w1*e2+w2*e1+w3*e4)*100.0;
+	F(4)=-0.5*(w1*e1+w2*e2+w3*e3)*100.0;
+	F(5)=100.0*((I2-I3)*w2*w3+T1*T1S)/I1;
+	F(6)=100.0*((I3-I1)*w3*w1+T2*T2S)/I2;
+	F(7)=100.0*((I1-I2)*w1*w2+T3*T3S)/I3;
+	L=100.0*(T1*T1+T2*T2+T3*T3)*0.5;
+}
+terminal_condition {
+	e1 = y(1);
+	e2 = y(2);
+	e3 = y(3);
+	e4 = y(4);
+	w1 = y(5);
+	w2 = y(6);
+	w3 = y(7);
+	phi=w1*w1+w2*w2+w3*w3+(e1+0.70106)*(e1+0.70106)+(e2+0.0923)*(e2+0.0923)+(e3+0.56098)*(e3+0.56098)+(e4+0.43047)*(e4+0.43047);
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=0.0;
+	y0(3)=0.0;
+	y0(4)=1.0;
+	y0(5)=0.01;
+	y0(6)=0.005;
+	y0(7)=0.001;
+}

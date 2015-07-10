@@ -1,0 +1,2 @@
+rm *.o
+cc -c -Wall -O3 -I ../src/ ../src/*.c

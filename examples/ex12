@@ -1,0 +1,62 @@
+/*
+Teo, K. L., Goh, C. J. and Wong, K. H.,
+{\em A unified computational approach to optimal control problems}, 
+Longman Scientific, 
+1991.
+pp. 305
+*/
+double x1;
+double x2;
+double x3;
+double u1;
+output_file = "ex12.data";
+n_states = 3;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 3;
+n_inequality = 2;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 5.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	Gamma(1)=x1-10.0;
+	Gamma(2)=x2+2.0;
+	Gamma(3)=x3-10.0;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	u1 = u(1);
+	F(1)=x2;
+	F(2)=-2.0+u1/x3;
+	F(3)=-0.01*u1;
+	//L = 1.0e-6*u1*u1;
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	u1 = u(1);
+	d(1)=u1-30.0;
+	d(2)=-30.0-u1;
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	phi=-x3;
+	Psi(1)=x1;
+	Psi(2)=x2;
+}
+solution_estimate {
+	y0(1)=10.0;
+	y0(2)=-2.0;
+	y0(3)=10.0;
+}

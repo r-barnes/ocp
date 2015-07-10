@@ -1,0 +1,10 @@
+export LUA_PATH=/home/fabien/Base/Code/lua/?.lua
+echo "$ Problem: $1"
+lua /home/fabien/Base/Code/lua/ctlua/ocpdirect.lua /home/fabien/Base/Code/dso/iocp/examples/$1 > $1direct.c
+rm $1direct.exe
+cc -O3 -Wall -o $1direct.exe $1direct.c ../lib/*.o -lc -lm
+#cc -g -Wall -o $1OCP.exe $1OCP.c ../lib/*.o -lc -lm
+#echo "Execute ..."
+#./$1direct.exe
+#rm $1direct.c
+

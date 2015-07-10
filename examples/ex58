@@ -1,0 +1,103 @@
+/*
+Agrawal, S. K. and Fabien, B. C.,\  {\it Optimization of Dynamic Systems},
+Kluwer Academic Publishers, 1999.
+pp. 120.
+*/
+double x1;
+double x2;
+double x3;
+double x4;
+double x5;
+double u1;
+double s1;
+double s2;
+double s3;
+double s4;
+double q11;
+double q12;
+double q13;
+double q14;
+double q22;
+double q23;
+double q24;
+double q33;
+double q34;
+double q44;
+double R;
+double ws;
+double wq;
+double r0;
+double r1;
+output_file = "ex58.data";
+n_states = 5;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 5;
+n_inequality = 0;
+n_terminal = 5;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+//control_type = LINEAR;
+
+q11=0.0;
+q12=0.0;
+q13=0.0;
+q14=0.0;
+q22=1.0;
+q23=0.0;
+q24=-1.0;
+q33=0.0;
+q34=0.0;
+q44=0.0;
+wq=3.865e5;
+s1=0.0;
+s2=1.0;
+s3=0.0;
+s4=-1.0;
+ws=6.337e2;
+R=2.081;
+r0=3.106e2;
+r1=0.0;
+
+//display = YES;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+	Gamma(3)=x3;
+	Gamma(4)=x4;
+	Gamma(5)=x5;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	u1 = u(1);
+	F(1)=x2;
+	F(2)=-r0*x1-r1*x2+r0*x3;
+	F(3)=x4;
+	F(4)=x5;
+	F(5)=u1;
+	L=0.5*(u1*u1*R+wq*(x2*x2-x2*x4-x4*x2+x4*x4)+2*ws*u1*(x2-x4));
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	Psi(1)=x1-1.0;
+	Psi(2)=x2;
+	Psi(3)=x3-1.0;
+	Psi(4)=x4;
+	Psi(5)=x5;
+}

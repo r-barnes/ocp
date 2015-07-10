@@ -1,0 +1,7 @@
+cat ../src/_ocp_template_c_ad_ > $1OCP.C
+cat $1 >> $1OCP.C
+echo } >> $1OCP.C
+g++ -O3 -Wall -o $1OCPad.exe $1OCP.C ../lib_ad/*.o -lc -lm
+./$1OCPad.exe
+#rm $1OCP.C 
+rm $1OCPad.exe

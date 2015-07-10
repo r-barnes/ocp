@@ -1,0 +1,76 @@
+/*
+Teo, K. L., Goh, C. J. and Wong, K. H.,
+{\em A unified computational approach to optimal control problems}, 
+Longman Scientific, 
+1991. 
+*/
+ADiff x;
+ADiff ya;
+ADiff ua;
+ADiff v;
+ADiff g;
+ADiff pa;
+double a;
+double V;
+double y1;
+input_file = "ex45.data";
+output_file = "ex46.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 4;
+n_inequality = 1;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+a=2.0;V=3.0;y1=5.0;
+
+initial_constraint {
+	x = y(1);
+	ya = y(2);
+	ua = y(3);
+	v = y(4);
+	pa = p(1);
+	Gamma(1)=x;
+	Gamma(2)=ya;
+	Gamma(3)=ua;
+	Gamma(4)=v;
+
+}
+dynamic_equation_and_cost_function {
+	x = y(1);
+	ya = y(2);
+	ua = y(3);
+	v = y(4);
+	g = u(1);
+	pa = p(1);
+	F(1)=(pa+10.0)*ua;
+	F(2)=(pa+10.0)*v;
+	F(3)=(pa+10.0)*a*cos(g);
+	F(4)=(pa+10.0)*a*sin(g);
+
+}
+inequality_constraint {
+	x = y(1);
+	ya = y(2);
+	ua = y(3);
+	v = y(4);
+	g = u(1);
+	pa = p(1);
+	d(1)=-(pa+10.0);
+
+}
+terminal_condition {
+	x = y(1);
+	ya = y(2);
+	ua = y(3);
+	v = y(4);
+	pa = p(1);
+	Psi(1)=ya-y1;
+	Psi(2)=x-V*(pa+10.0);
+	phi=(pa+10.0);
+
+}

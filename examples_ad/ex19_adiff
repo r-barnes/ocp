@@ -1,0 +1,102 @@
+/*
+Stienbach, M., Bock, H. G.\ and Longman, R. W.,
+Time-optimal extension or retraction in polar coordinate robots:\
+A numerical analysis of the switching structure.
+In {\em  Proc. AIAA Guid. Nav. and Cont. Conf.}, 
+pp. 883--894, 1989
+*/
+ADiff x1;
+ADiff x2;
+ADiff x3;
+ADiff x4;
+ADiff u1;
+ADiff u2;
+ADiff p1;
+ADiff a_3;
+
+double Le, m_B, m_L,f m_LB, Force, T,I_o,r_e;
+
+
+input_file = "ex18.data";
+output_file = "ex19.data";
+
+n_states        = 4;
+n_controls      = 2;
+n_parameters    = 1;
+n_initial       = 4;
+n_inequality    = 5;
+n_terminal      = 4;
+n_nodes         = 201;
+initial_time    = 0.0;
+final_time      = 1.0;
+tolerance       = 1.0e-6;
+
+maximum_iterations = 2000;
+
+Le=0.0;
+m_B=40.0;
+m_L=0.0;
+m_LB=40.0;
+Force=5.0;
+T=300.0;
+I_o=0.24;
+r_e=0.25;
+cpi=3.141592654;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	p1 = p(1);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+	Gamma(3)=x3-2.0*(Le+m_L*Le/m_LB);
+	Gamma(4)=x4;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	u1 = u(1);
+	u2 = u(2);
+	p1 = p(1);
+	a_3=2.0/(x3*x3+4.0*Le*Le*m_L*m_B/(m_LB*m_LB)+4.0*I_o/m_LB);
+	F(1)=(u1+x2*x2*x3)*(p1+1.0);
+	F(2)=((u2-x1*x2*x3)*a_3)*(p1+1.0);
+	F(3)=x1*(p1+1.0);
+	F(4)=x2*(p1+1.0);
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	u1 = u(1);
+	u2 = u(2);
+	p1 = p(1);
+	d(1)=-(p1+1.0);
+	d(2)=u1-2*Force/m_LB;
+	d(3)=-2.0*Force/m_LB-u1;;
+	d(4)=u2-2*T/m_LB;
+	d(5)=-2.0*T/m_LB-u2;
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	p1 = p(1);
+	Psi(1)=x1;
+	Psi(2)=x2;
+	Psi(3)=x3-2.0*(r_e+m_L*Le/m_LB);
+	Psi(4)=x4-cpi/10.0;;
+	phi=(p1+1.0);
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=0.0;
+	y0(3)=2.0*(Le+m_L*Le/m_LB);
+	y0(4)=0.0;
+}

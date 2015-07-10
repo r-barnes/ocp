@@ -1,0 +1,50 @@
+/*
+Jacobson, D, Gershwin, S. and Lele, M.,
+Computation of Optimal Singular Controls
+Jacobson, D. H.\ and Lele, M. M.,
+{\em  IEEE Trans. AC}, 
+Vol. 15,
+pp. 67--73, 1970.
+*/
+double x1;
+double x2;
+double u1;
+output_file = "ex32.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 2;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 5.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	Gamma(1)=x1;
+	Gamma(2)=x2-1.0;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	F(1)=x2;
+	F(2)=u1;
+	L=x1*x1+x2*x2;
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	d(1)=u1-1.0;
+	d(2)=-1.0-u1;
+}
+terminal_condition {
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=1.0;
+}

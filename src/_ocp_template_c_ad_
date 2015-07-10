@@ -1,0 +1,681 @@
+// Copyright (c) 2009,2010,2011,2012 Brian C. Fabien
+// All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the license.txt file.
+
+#include <stdio.h>
+#include <float.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "../src/runtime.h"
+#include "../src/vector.h"
+#include "../src/matrix.h"
+#include "../src/equations.h"
+#include "../src/nlpsolve.h"
+#include "../src/ocp.h"
+#include "../src/rkocp.h"
+#include "../src/adiff.h"
+
+#define EVAL            0
+#define EVAL_GAMMA      1
+#define EVAL_FL         2
+#define EVAL_D          3
+#define EVAL_PHI_PSI    4
+#define EVAL_ESTIMATE   5
+
+#define EVAL_DERIV_GAMMA      10
+#define EVAL_DERIV_FL         20
+#define EVAL_DERIV_D          30
+#define EVAL_DERIV_PHI_PSI    40
+
+#define FORWARD_DIFFERENCE 0
+#define ANALYTICAL 1
+#define AUTOMATIC 2
+
+#define initial_constraint if(_mode==EVAL_GAMMA)
+#define dynamic_equation_and_cost_function if(_mode==EVAL_FL)
+#define inequality_constraint if(_mode==EVAL_D)
+#define terminal_condition if(_mode==EVAL_PHI_PSI)
+#define solution_estimate if(_mode==EVAL_ESTIMATE)
+
+#define derivative_initial_constraint if(_mode==EVAL_DERIV_GAMMA)
+#define derivative_dynamic_equation_and_cost_function if(_mode==EVAL_DERIV_FL)
+#define derivative_inequality_constraint if(_mode==EVAL_DERIV_D)
+#define derivative_terminal_condition if(_mode==EVAL_DERIV_PHI_PSI)
+
+#define Gamma(i) _gamma[(i)-1]
+//#define DGammay(i,j) _dgammay[(i)-1][(j)-1]
+//#define DGammap(i,j) _dgammap[(i)-1][(j)-1]
+
+#define d(i) _d[(i)-1]
+//#define Ddy(i,j) _ddy[(i)-1][(j)-1]
+//#define Ddu(i,j) _ddu[(i)-1][(j)-1]
+//#define Ddp(i,j) _ddp[(i)-1][(j)-1]
+
+#define F(i) _f[(i)-1]
+//#define DFy(i,j) _dfy[(i)-1][(j)-1]
+//#define DFu(i,j) _dfu[(i)-1][(j)-1]
+//#define DFp(i,j) _dfp[(i)-1][(j)-1]
+
+//#define DLy(i) _dLy[(i)-1]
+//#define DLu(i) _dLu[(i)-1]
+//#define DLp(i) _dLp[(i)-1]
+
+//#define Dphiy(i) _dphiy[(i)-1]
+//#define Dphip(i) _dphip[(i)-1]
+
+#define Psi(i) _psi[(i)-1]
+//#define DPsiy(i,j) _dpsiy[(i)-1][(j)-1]
+//#define DPsip(i,j) _dpsip[(i)-1][(j)-1]
+
+#define L _L[0]
+#define phi _phi[0]
+
+#define y(i) _y[(i)-1]
+#define u(i) _u[(i)-1]
+#define p(i) _p[(i)-1]
+#define y0(i) _y0[(i)-1]
+#define u0(i,j) _u0[(i)-1][(j)-1]
+#define p0(i) _p0[(i)-1]
+
+#define Do(i,j,k) for(i=(j);i<=(k);i++)
+#define Double(x) ((double)(x))
+
+void evaluate_gamma(Vector y, Vector p, Vector Gamma);
+double evaluate_fL(Vector y, Vector u, Vector p, double _t, Vector f);
+void evaluate_d(Vector y, Vector u, Vector p, double _t, Vector d);
+double evaluate_phi_psi(Vector y, Vector p, Vector Psi);
+
+void evaluate_Dd(Vector y, Vector u, Vector p, double _t, Matrix dy, Matrix du, Matrix dp);
+void evaluate_Dgamma(Vector y, Vector p, Matrix Gy, Matrix Gp);
+void evaluate_DfL(Vector y, Vector u, Vector p, double _t, Matrix fy, Matrix fu, Matrix fp, Vector Ly, Vector Lu, Vector Lp);
+void evaluate_Dphi_Dpsi(Vector y, Vector p, Vector phiy, Vector phip, Matrix Psiy, Matrix Psip);
+
+void get_data(int _mode);
+int check_data();
+void solve_ocp();
+int _remesh_(RKOCP r0);
+
+int n_adiff = 1;
+int n_nodes = 0;
+int n_states = 0;
+int n_controls = 0;
+int n_parameters = 0;
+int n_terminal = 0;
+int n_initial = 0;
+int n_inequality = 0;
+
+double initial_time = 0.0;
+double final_time = 1.0;
+
+int maximum_remesh = 0;
+int maximum_nodes = 500;
+int maximum_iterations = 2000;
+int control_type = CONSTANT; // LINEAR; CUBIC; CONSTANT
+int runge_kutta_method = DormandPrince8_7;
+int derivative = AUTOMATIC;
+double tolerance = 1.0e-6;
+int display = NO; // NO;
+enum NLPmethod nlp_method = L1SQPmethod;
+
+ADiff *_f = NULL;
+ADiff *_gamma = NULL;
+ADiff *_d = NULL;
+ADiff *_psi = NULL;
+ADiff *_y = NULL;
+ADiff *_u = NULL;
+ADiff *_p = NULL;
+
+//double **_dfy = NULL;
+//double **_dfu = NULL;
+//double **_dfp = NULL;
+
+//double **_dgammay = NULL;
+//double **_dgammap = NULL;
+Vector _gradient = NULL;
+
+//double **_ddy = NULL;
+//double **_ddu = NULL;
+//double **_ddp = NULL;
+
+//double **_dpsiy = NULL;
+//double **_dpsip = NULL;
+
+//double *_dphiy = NULL;
+//double *_dphip = NULL;
+
+//double *_dLy = NULL;
+//double *_dLu = NULL;
+//double *_dLp = NULL;
+
+ADiff *_phi = NULL;
+ADiff *_L = NULL;
+double t = 0.0;
+
+const char *input_file = NULL;
+const char *output_file = "ocp.data";
+
+//char *input_file = NULL;
+//char *output_file = "ocp.data";
+
+FILE *_input_file_id = NULL;
+FILE *_output_file_id = NULL;
+
+double *_y0 = NULL;
+double **_u0 = NULL;
+double *_p0 = NULL;
+
+int _mesh_count = 0;
+
+Vector _T = NULL, _P = NULL;
+Matrix _Y = NULL, _U = NULL;
+
+void evaluate_gamma(Vector y, Vector p, Vector Gamma) {
+    int i;
+    ADiff::set_compute_gradient(NO);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+
+    get_data(EVAL_GAMMA);
+
+    for (i = 0; i < n_initial; i++) Gamma->e[i] = _gamma[i].get_value();
+}
+
+void evaluate_Dgamma(Vector y, Vector p, Matrix Gy, Matrix Gp) {
+    int i, j;
+    ADiff::set_compute_gradient(YES);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+
+    get_data(EVAL_GAMMA);
+
+    for (i = 0; i < n_initial; i++) {
+        _gamma[i].get_gradient(_gradient);
+        for (j = 0; j < n_states; j++) {
+            Gy->e[i][j] = _gradient->e[j];
+        }
+        for (j = 0; j < n_parameters; j++) {
+            Gp->e[i][j] = _gradient->e[n_states + n_controls + j];
+        }
+    }
+}
+
+double evaluate_fL(Vector y, Vector u, Vector p, double _t, Vector f) {
+    int i;
+    ADiff::set_compute_gradient(NO);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_controls; i++) _u[i].set_value(u->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+    t = _t;
+    L.set_value(0.0);
+
+    get_data(EVAL_FL);
+
+    for (i = 0; i < n_states; i++) {
+        f->e[i] = _f[i].get_value();
+    }
+    return L.get_value();
+}
+
+void evaluate_DfL(Vector y, Vector u, Vector p, double _t,
+        Matrix fy, Matrix fu, Matrix fp,
+        Vector Ly, Vector Lu, Vector Lp) {
+    int i, j;
+    ADiff::set_compute_gradient(YES);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_controls; i++) _u[i].set_value(u->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+    t = _t;
+    L.set_value(0.0);
+
+    get_data(EVAL_FL);
+
+    for (i = 0; i < n_states; i++) {
+        _f[i].get_gradient(_gradient);
+        for (j = 0; j < n_states; j++) {
+            fy->e[i][j] = _gradient->e[j];
+        }
+        for (j = 0; j < n_controls; j++) {
+            fu->e[i][j] = _gradient->e[n_states + j];
+        }
+        for (j = 0; j < n_parameters; j++) {
+            fp->e[i][j] = _gradient->e[n_states + n_controls + j];
+        }
+    }
+
+    L.get_gradient(_gradient);
+    for (i = 0; i < n_states; i++) {
+        Ly->e[i] = _gradient->e[i];
+    }
+    for (i = 0; i < n_controls; i++) {
+        Lu->e[i] = _gradient->e[n_states + i];
+    }
+    for (i = 0; i < n_parameters; i++) {
+        Lp->e[i] = _gradient->e[n_states + n_controls + i];
+    }
+}
+
+void evaluate_d(Vector y, Vector u, Vector p, double _t, Vector d) {
+    int i;
+    ADiff::set_compute_gradient(NO);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_controls; i++) _u[i].set_value(u->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+    t = _t;
+
+    get_data(EVAL_D);
+
+    for (i = 0; i < n_inequality; i++) {
+        d->e[i] = _d[i].get_value();
+    }
+}
+
+void evaluate_Dd(Vector y, Vector u, Vector p, double _t,
+        Matrix dy, Matrix du, Matrix dp) {
+    int i, j;
+    ADiff::set_compute_gradient(YES);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_controls; i++) _u[i].set_value(u->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+    t = _t;
+
+    get_data(EVAL_D);
+
+    for (i = 0; i < n_inequality; i++) {
+        _d[i].get_gradient(_gradient);
+        for (j = 0; j < n_states; j++) {
+            dy->e[i][j] = _gradient->e[j];
+        }
+        for (j = 0; j < n_controls; j++) {
+            du->e[i][j] = _gradient->e[n_states + j];
+        }
+        for (j = 0; j < n_parameters; j++) {
+            dp->e[i][j] = _gradient->e[n_states + n_controls + j];
+        }
+    }
+}
+
+double evaluate_phi_psi(Vector y, Vector p, Vector Psi) {
+    int i;
+    ADiff::set_compute_gradient(NO);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+    phi.set_value(0.0);
+
+    get_data(EVAL_PHI_PSI);
+
+    for (i = 0; i < n_terminal; i++) {
+        Psi->e[i] = _psi[i].get_value();
+    }
+    return phi.get_value();
+}
+
+void evaluate_Dphi_Dpsi(Vector y, Vector p, Vector phiy, Vector phip,
+        Matrix Psiy, Matrix Psip) {
+    int i, j;
+    ADiff::set_compute_gradient(YES);
+    for (i = 0; i < n_states; i++) _y[i].set_value(y->e[i]);
+    for (i = 0; i < n_parameters; i++) _p[i].set_value(p->e[i]);
+
+    phi.set_value(0.0);
+    get_data(EVAL_PHI_PSI);
+
+    for (i = 0; i < n_terminal; i++) {
+        _psi[i].get_gradient(_gradient);
+        for (j = 0; j < n_states; j++) {
+            Psiy->e[i][j] = _gradient->e[j];
+        }
+        for (j = 0; j < n_parameters; j++) {
+            Psip->e[i][j] = _gradient->e[n_states + n_controls + j];
+        }
+    }
+
+    phi.get_gradient(_gradient);
+    for (i = 0; i < n_states; i++) {
+        phiy->e[i] = _gradient->e[i];
+    }
+    for (i = 0; i < n_parameters; i++) {
+        phip->e[i] = _gradient->e[n_states + n_controls + i];
+    }
+}
+
+int check_data() {
+    if (n_nodes < 2) {
+        printf("Error: n_nodes < 2\n");
+        return -1;
+    }
+    if (n_states < 1) {
+        printf("Error: n_states < 1\n");
+        return -1;
+    }
+    if (n_controls < 0) {
+        printf("Error: n_controls < 0\n");
+        return -1;
+    }
+    if (n_parameters < 0) {
+        printf("Error: n_parameters < 0\n");
+        return -1;
+    }
+    if (n_initial < 0) {
+        printf("Error: n_initial < 0\n");
+        return -1;
+    }
+    if (n_terminal < 0) {
+        printf("Error: n_terminal < 0\n");
+        return -1;
+    }
+    if (n_inequality < 0) {
+        printf("Error: n_inequality < 0\n");
+        return -1;
+    }
+    if (input_file) {
+    	_input_file_id = fopen((char *)input_file, "r");
+    	if (_input_file_id == NULL) {
+    		printf("Error: unable to open input file: %s\n", input_file);
+    		return -1;
+    	}
+    }
+    if (output_file) {
+    	_output_file_id = fopen((char *)output_file, "w");
+    	if (_output_file_id == NULL) {
+    		printf("Error: unable to open output file: %s\n", output_file);
+    		return -1;
+    	}
+    }
+    return 0;
+}
+
+void solve_ocp() {
+    time_t start, end;
+    OCP o = NULL;
+    RKOCP r = NULL;
+    int i, j, error = 0;
+
+    o = OCPNew();
+    o->n_states = n_states;
+    o->n_controls = n_controls;
+    o->n_parameters = n_parameters;
+
+    o->n_initial = n_initial;
+    o->n_terminal = n_terminal;
+    o->n_inequality = n_inequality;
+
+    o->differential_equations = evaluate_fL;
+    o->initial_constraints = evaluate_gamma;
+    o->inequality_constraints = evaluate_d;
+    o->terminal_constraints = evaluate_phi_psi;
+
+    o->Ddifferential_equations = evaluate_DfL;
+    o->Dinitial_constraints = evaluate_Dgamma;
+    o->Dinequality_constraints = evaluate_Dd;
+    o->Dterminal_constraints = evaluate_Dphi_Dpsi;
+
+    /* initialize the ADiff variables */
+
+    n_adiff = n_states + n_controls + n_parameters;
+    ADiff::set_number_adiff_variables(n_adiff);
+    ADiff::set_compute_hessian(NO);
+
+    _y = new ADiff[n_states];
+    for (i = 0; i < n_states; i++) {
+        _y[i].set_gradient_value(i, 1.0);
+    }
+    if (n_controls > 0) {
+        _u = new ADiff[n_controls];
+        for (i = 0; i < n_controls; i++)
+            _u[i].set_gradient_value(i + n_states, 1.0);
+    }
+    if (n_parameters > 0) {
+        _p = new ADiff[n_parameters];
+        for (i = 0; i < n_parameters; i++)
+            _p[i].set_gradient_value(i + n_states + n_controls, 1.0);
+    }
+    _f = new ADiff[n_states];
+    _phi = new ADiff[1];
+    _L = new ADiff[1];
+    if (n_initial > 0) {
+        _gamma = new ADiff[n_initial];
+    }
+    if (n_inequality > 0) {
+        _d = new ADiff[n_inequality];
+    }
+    if (n_terminal > 0) {
+        _psi = new ADiff[n_terminal];
+    }
+
+    _gradient = VectorNew(n_states + n_controls + n_parameters);
+
+    _T = VectorLinspace(initial_time, final_time, n_nodes);
+
+    _Y = MatrixNew(n_nodes, n_states);
+    if (n_controls > 0) _U = MatrixNew(n_nodes, n_controls);
+    if (n_parameters > 0) _P = VectorNew(n_parameters);
+
+    // get the initial solution estimate;
+    if (_input_file_id) { // read from file?
+        error = OCPReadData(o, _input_file_id, _T, _Y, _U, _P);
+        if (error != 0) {
+            RuntimeWarning("Unable to read the input file");
+        }
+    } else {
+        _y0 = (double *) calloc(n_states, sizeof (double));
+        if (n_controls > 0) {
+            _u0 = (double **) malloc(n_controls * sizeof (double *));
+            for (i = 0; i < n_controls; i++) {
+                _u0[i] = (double *) calloc(n_nodes, sizeof (double));
+            }
+        }
+        if (n_parameters > 0) _p0 = (double *) calloc(n_parameters, sizeof (double));
+
+        get_data(EVAL_ESTIMATE);
+
+        for (i = 0; i < n_states; i++) {
+            _Y->e[0][i] = _y0[i];
+        }
+        for (i = 0; i < n_controls; i++) {
+            for (j = 0; j < n_nodes; j++) {
+                _U->e[j][i] = _u0[i][j];
+            }
+        }
+        for (i = 0; i < n_parameters; i++) {
+            _P->e[i] = _p0[i];
+        }
+        free(_y0);
+        for (i = 0; i < n_controls; i++) {
+            free(_u0[i]);
+        }
+        if (n_controls > 0) free(_u0);
+        if (n_parameters > 0) free(_p0);
+    }
+
+    int _n_iter = 0, _n_fun = 0, _n_grad = 0, _n_soc = 0, _n_qp = 0;
+    double _clock = 0;
+	do {
+		r = RKOCPNew(o);
+		r->runge_kutta_method = runge_kutta_method;
+		r->control_type = control_type;
+		r->tolerance = tolerance;
+		r->maximum_iterations = maximum_iterations;
+		r->display_data = display;
+		r->nlp_method = nlp_method;
+		
+		start = clock();
+		RKOCPSolve(r, _T, _Y, _U, _P);
+		end = clock();
+
+        _clock += ((double) (end - start)) / CLOCKS_PER_SEC;
+        _n_iter += r->nlp_stats.numberOfIterations;
+        _n_fun += r->nlp_stats.numberOfFunctionCalls;
+        _n_grad += r->nlp_stats.numberOfGradientCalls;
+        _n_soc += r->nlp_stats.numberOfSOC;
+        _n_qp += r->nlp_stats.numberOfQPSolves;
+
+    } while(_remesh_(r));
+
+    if (r->display_data == NO) {
+        printf("$ NLP method: %s\n", r->nlp_stats.methodName);
+        printf("$ n: %d\n", r->nlp_stats.n);
+        printf("$ m: %d\n", r->nlp_stats.m);
+        printf("$ p: %d\n", r->nlp_stats.p);
+        printf("$ f: %g\n", r->nlp_stats.f);
+        printf("$ |c|: %g\n", r->nlp_stats.normc);
+        printf("$ |T|: %g\n", r->nlp_stats.normT);
+        printf("$ exit code: %d\n", r->nlp_stats.exitCode);
+        printf("$ iterations: %d\n", _n_iter);
+        printf("$ function evaluations: %d\n", _n_fun);
+        printf("$ gradient evaluations: %d\n", _n_grad);
+        printf("$ second-order corrections: %d\n", _n_soc);
+        printf("$ QP problems: %d\n", _n_qp);
+        //printf("$ numRelaxedQP: %d\n", r->nlp_stats.numberOfQPSolves - 
+        //                               r->nlp_stats.numberOfGradientCalls);
+        //printf("$ numRefinement: %d\n", r->nlp_stats.numberOfRefinements);
+    }
+    printf("$ mesh refinements: %d\n", _mesh_count);
+    printf("$ scaled LTE: %g\n", r->max_lte);
+    printf("$ nodes: %d\n", VEC_LENGTH(_T));
+    printf("$ states: %d\n", n_states);
+    printf("$ controls: %d\n", n_controls);
+    printf("$ parameters: %d\n", n_parameters);
+    printf("$ control type: %s\n", r->controlTypeName);
+    printf("$ Runge Kutta method: %s\n", r->rkMethodName);
+    printf("$ output file: %s\n", output_file);
+    printf("$ solution time (sec): %g\n",  _clock);
+
+	error = OCPWriteData(o, _output_file_id, _T, _Y, _U, _P, control_type, tolerance);
+	if (error != 0) {
+		RuntimeWarning("Unable to write the output file");
+	}
+
+    RKOCPDelete(r);
+    VectorDelete(_T);
+    MatrixDelete(_Y);
+    if (n_controls > 0) {
+        MatrixDelete(_U);
+    }
+    if (n_parameters > 0) {
+        VectorDelete(_P);
+    }
+    OCPDelete(o);
+    
+    // delete Adiff related variables
+    
+    if (_gradient != NULL) VectorDelete(_gradient);
+    if (n_states > 0) {
+        delete [] _y;
+        delete [] _f;
+    }
+    if (n_controls > 0) {
+        delete [] _u;
+    }
+    if (n_parameters > 0) {
+        delete [] _p;
+    }
+    if (n_initial > 0) {
+        delete [] _gamma;
+    }
+    if (n_terminal > 0) {
+        delete [] _psi;
+    }
+    if (n_inequality > 0) {
+        delete [] _d;
+    }
+    delete [] _L;
+    delete [] _phi;
+}
+
+int _remesh_(RKOCP r) {
+	r->max_lte = VectorMax(r->lte);
+    if (r->max_lte < 1.0) {
+    	return NO;
+    }
+    
+    if (_mesh_count >= maximum_remesh) {
+    	RuntimeWarning("Too many mesh refinements");
+    	return NO;
+    }
+    _mesh_count++;
+    
+    int new_nodes = 0;
+    int i;
+    for (i = 1; i < r->n_nodes; i++) {
+    	if (r->lte->e[i] >= 1.0) {
+    		new_nodes++;
+    	}
+    }
+    
+    if ((r->n_nodes+new_nodes) > maximum_nodes) {
+		RuntimeWarning("Too many nodes required");
+    	return NO;
+    }
+
+    int N = r->n_nodes + new_nodes;
+    Vector _TT = VectorNew(N);
+    Matrix _YY = MatrixNew(N, r->n_states);
+    Matrix _UU = NULL;
+    Vector _PP = NULL;
+    if (r->n_controls > 0) _UU = MatrixNew(N, r->n_controls);
+    if (r->n_parameters > 0) _PP = VectorCopy(r->P);
+    
+    int j, k = 0;
+    for (i = 0; i < r->n_nodes-1; i++) {
+    	_TT->e[k] = r->T->e[i];
+    	for (j = 0; j < r->n_states; j++) {
+    		_YY->e[k][j] = r->Y->e[i][j];
+    	}
+    	for (j = 0; j < r->n_controls; j++) {
+    		_UU->e[k][j] = r->U->e[i][j];
+    	}
+    	k++;
+    	
+    	// add a node?
+    	if (r->lte->e[i+1] >= 1.0) {
+    		_TT->e[k] = 0.5*(r->T->e[i] + r->T->e[i+1]);
+    		for (j = 0; j < r->n_states; j++) {
+    			_YY->e[k][j] = 0.5*(r->Y->e[i][j] + r->Y->e[i+1][j]);
+    		}
+    		for (j = 0; j < r->n_controls; j++) {
+    			_UU->e[k][j] = 0.5*(r->U->e[i][j] + r->U->e[i+1][j]);
+    		}
+    		k++;
+    	}
+    }
+    
+    // add the last node
+    i = r->n_nodes-1;
+    _TT->e[k] = r->T->e[i];
+    for (j = 0; j < r->n_states; j++) {
+    		_YY->e[k][j] = r->Y->e[i][j];
+    }
+    for (j = 0; j < r->n_controls; j++) {
+    	_UU->e[k][j] = r->U->e[i][j];
+    }
+    
+    RKOCPDelete(r);
+	VectorDelete(_T);
+	MatrixDelete(_Y);
+	if (_U != NULL) MatrixDelete(_U);
+	if (_P != NULL) VectorDelete(_P);
+	
+    _T = VectorCopy(_TT);VectorDelete(_TT);
+    _Y = MatrixCopy(_YY);MatrixDelete(_YY);
+    if (_UU != NULL) { _U = MatrixCopy(_UU); MatrixDelete(_UU); }
+    if (_PP != NULL) { _P = VectorCopy(_PP); VectorDelete(_PP); }
+    
+	printf("*** MESH COUNT: %d *** n_nodes = %d ***\n", _mesh_count, N);
+    
+	return YES;
+}
+
+int main() {
+    get_data(EVAL);
+    if (check_data() == 0) {
+        solve_ocp();
+    }
+    return 0;
+}
+
+void get_data(int _mode) {
+

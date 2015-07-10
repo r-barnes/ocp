@@ -1,0 +1,57 @@
+/*
+Bhattacharya, R.,
+OPTRAGEN: A MATLAB Toolbox for Optimal Trajectory Generation,
+{\it 45th IEEE Conference on Decision and Control},
+pp. 6832 -- 6836, 2006.
+*/
+double x;
+double ya;
+double xdot;
+double ydot;
+double ux;
+double uy;
+output_file = "ex73.data";
+n_states = 4;
+n_controls = 2;
+n_parameters = 0;
+n_initial = 4;
+n_inequality = 2;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x = y(1);
+	ya = y(2);
+	xdot = y(3);
+	ydot = y(4);
+	Gamma(1)=x;
+	Gamma(2)=ya;
+	Gamma(3)=xdot;
+	Gamma(4)=ydot;
+}
+dynamic_equation_and_cost_function {
+	xdot = y(3);
+	ydot = y(4);
+	ux = u(1);
+	uy = u(2);
+	F(1)=xdot;
+	F(2)=ydot;
+	F(3)=(ux+1.0);
+	F(4)=(uy+1.0);
+	L=(ux+1.0)*(ux+1.0)+(uy+1.0)*(uy+1.0);
+}
+inequality_constraint {
+	x = y(1);
+	ya = y(2);
+	d(1)=0.1-((x-0.4)*(x-0.4)+(ya-0.5)*(ya-0.5));
+	d(2)=0.1-((x-0.8)*(x-0.8)+(ya-1.5)*(ya-1.5));
+}
+terminal_condition {
+	x = y(1);
+	ya = y(2);
+	Psi(1)=x-1.2;
+	Psi(2)=ya-1.6;
+}

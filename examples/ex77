@@ -1,0 +1,161 @@
+/*
+Fabien, B. C., 
+The influence of failure criteria on the design optimization of 
+stacked-ply composite flywheels, 
+{\it Structural and Multidisciplinary Optimization},
+Vol. 33, pp. 507--517, 2007.
+*/
+double y1;
+double y2s;
+double y3s;
+double y4;
+double u1;
+double p1;
+double p2;
+double y2;
+double y3;
+double y5;
+double y6;
+double cy;
+double s;
+double c2;
+double s2;
+double c3;
+double s3;
+double c4;
+double s4;
+double Qrr;
+double Qtt;
+double Qrt;
+double a11;
+double a22;
+double a12;
+double dt;
+double s11;
+double s22;
+double s12;
+double dp;
+double s12p;
+double s22p;
+double Qrrp;
+double Qttp;
+double Qrtp;
+double a11p;
+double a12p;
+double a22p;
+double E11;
+double E22;
+double G12;
+double nu12;
+double nu21;
+double lambda;
+double Q11;
+double Q22;
+double Q12;
+double Q21;
+double Q66;
+double pwr;
+int i;
+output_file = "ex77.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 2;
+n_terminal = 1;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 0.85;
+tolerance = 1.0e-6;
+//control_type = LINEAR;
+
+p1=0.0;
+p2=0.0;
+
+initial_constraint {
+	y1 = y(1);
+	y2s = y(2);
+	y3s = y(3);
+	y4 = y(4);
+	Gamma(1)=y1;
+	Gamma(2)=y4-0.15;
+}
+dynamic_equation_and_cost_function {
+	y1 = y(1);
+	y2s = y(2);
+	y3s = y(3);
+	y4 = y(4);
+	u1 = u(1);
+	E11=142610e6;
+	E22=61.402e6;
+	G12=23.3328e6;
+	nu12=0.25;
+	lambda=0.71;
+	nu21=nu12*E22/E11;
+	Q11=1.0/(1-nu12*nu21);
+	Q22=(E22/(1-nu12*nu21))/E11;
+	Q12=nu21/(1-nu12*nu21);
+	Q21=Q12;
+	Q66=G12/E11;
+	pwr=2.0;
+	y2=y2s+p1;
+	y3=y3s+p2;
+	cy=cos(y3);
+	s=sin(y3);
+	c2=cy*cy;
+	s2=s*s;
+	c3=c2*cy;
+	s3=s2*s;
+	c4=c3*cy;
+	s4=s3*s;
+	Qrr=Q11*c4+Q22*s4+(2.0*Q12+4.0*Q66)*c2*s2;
+	Qtt=Q11*s4+Q22*c4+(2.0*Q12+4.0*Q66)*c2*s2;
+	Qrt=Q12*(c4+s4)+(Q11+Q22-4.0*Q66)*c2*s2;
+	a11=lambda*Q22+(1.0-lambda)*Qrr;
+	a22=lambda*Q11+(1.0-lambda)*Qtt;
+	a12=lambda*Q12+(1.0-lambda)*Qrt;
+	dt=a11*a22-a12*a12;;
+	s11=a22/dt;
+	s22=a11/dt;
+	s12=-a12/dt;
+	Qrrp=-4.0*Q11*c3*s+4.0*Q22*s3*cy+(2.0*Q12+4.0*Q66)*(-2.0*cy*s3+2.0*c3*s);
+	Qttp=4.0*Q11*s3*cy-4.0*Q22*c3*s+(2.0*Q12+4.0*Q66)*(-2.0*cy*s3+2.0*c3*s);
+	Qrtp=Q12*(-4.0*c3*s+4.0*s3*cy)+(Q11+Q22-4.0*Q66)*(-2.0*cy*s3+2.0*c3*s);
+	a11p=(1.0-lambda)*Qrrp;
+	a22p=(1.0-lambda)*Qttp;
+	a12p=(1.0-lambda)*Qrtp;
+	dp=a11p*a22+a11*a22p-2.0*a12*a12p;
+	s22p=a11p/dt-(a11*dp)/(dt*dt);
+	s12p=-a12p/dt+(a12*dp)/(dt*dt);
+	y5=(y2-y4*y4-y1)/y4;
+	y6=-((y4*s22p*u1+s22)*y2+(y4*s12p*u1-s11)*y1-y4*y4*s12)/(y4*s22);
+	F(1)=y5;
+	F(2)=y6;
+	F(3)=u1;
+	F(4)=1;
+	L=y1*y1+y2*y2 +1.0e-3*u1*u1;
+}
+inequality_constraint {
+	y1 = y(1);
+	y2s = y(2);
+	y3s = y(3);
+	y4 = y(4);
+	u1 = u(1);
+	d(1)=-1.5707-y3s;
+	d(2)=y3s-1.5707;
+}
+terminal_condition {
+	y1 = y(1);
+	y2s = y(2);
+	y3s = y(3);
+	y4 = y(4);
+	Psi(1)=y1;
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=0.3703;
+	y0(3)=0.1;
+	y0(4)=0.15;
+	for(i=1;i<n_nodes;i++)
+	    u0(1,i) = 0.2;
+}

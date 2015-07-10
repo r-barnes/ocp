@@ -1,0 +1,70 @@
+/*
+
+*/
+
+
+output_file = "ex84.data";
+n_states = 6;
+n_controls = 3;
+n_parameters = 1;
+n_initial = 6;
+n_inequality = 7;
+n_terminal = 6;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+double alpha, T;
+double m, g, J, r, mu, fac;
+
+r = 0.2;
+J = 0.05;
+m = 2.2;
+g = 4.0 / m;
+mu = 1000.0;
+fac = 3.141592654 / 180.0;
+
+initial_constraint {
+	Gamma(1) = y(1);
+	Gamma(2) = y(2);
+	Gamma(3) = y(3);
+	Gamma(4) = y(4);
+	Gamma(5) = y(5);
+	Gamma(6) = y(6);
+}
+
+dynamic_equation_and_cost_function {
+    alpha = u(3);
+    T = 10.0 - p(1);
+    
+	F(1) = y(4) * T;
+	F(2) = y(5) * T;
+	F(3) = y(6) * T;
+	F(4) = (u(1) * cos(alpha) - u(2) * sin(alpha)) * T / m;
+	F(5) = (-m * g + u(1) * sin(alpha) + u(2) * cos(alpha)) * T / m;
+	F(6) = (r * u(1)) * T/ J;
+	L = 2.0*u(1)*u(1) + u(2)*u(2);
+}
+
+inequality_constraint {
+    alpha = u(3);
+    d(1) = u(1) - 5.0;
+    d(2) = -5.0 - u(1);
+    d(3) = u(2) - 17.0;
+    d(4) = -u(2);
+    d(5) = alpha - 30.0 * fac;
+    d(6) = -30.0 * fac - alpha;   
+    d(7) = - p(1); 
+}
+
+terminal_condition {
+	Psi(1) = y(1);
+	Psi(2) = y(2) - 1.0;
+	Psi(3) = y(3);
+	Psi(4) = y(4);
+	Psi(5) = y(5);
+	Psi(6) = y(6);
+	phi = mu * (10.0 - p(1));
+}
+

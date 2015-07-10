@@ -1,0 +1,89 @@
+/*
+ Rosen, O. and Luus R.,
+ Global optimization approach to nonlinear optimal control,
+ {\it J. Optimization Theory and Applications},
+  Vol.73, pp. 547--562, 1992.
+*/
+ADiff x1;
+ADiff x2;
+ADiff u1;
+ADiff p1;
+ADiff k1;
+ADiff k2;
+ADiff k3;
+ADiff k4;
+ADiff k5;
+double A1;
+double A2;
+double A3;
+double A4;
+double A5;
+double B1;
+double B2;
+double B3;
+double B4;
+double B5;
+ADiff w;
+output_file = "ex54.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 2;
+n_inequality = 4;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	p1 = p(1);
+	Gamma(1)=x1-1.0;
+	Gamma(2)=x2;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	p1 = p(1);
+	w=710.0+u1;
+	B1=10215.4;
+	B2=18820.5;
+	B3=17008.9;
+	B4=14190.8;
+	B5=15599.8;
+	A1=exp(8.86);
+	A2=exp(24.25);
+	A3=exp(23.67);
+	A4=exp(18.75);
+	A5=exp(20.70);
+	k1=A1*exp(-B1/w);
+	k2=A2*exp(-B2/w);
+	k3=A3*exp(-B3/w);
+	k4=A4*exp(-B4/w);
+	k5=A5*exp(-B5/w);
+	F(1)=-(p1+9.0)*(k1*x1+(k3+k4+k5)*x1*x2);
+	F(2)=(p1+9.0)*(k1*x1-k2*x2+k3*x1*x2);
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	p1 = p(1);
+	d(1)=7.0-(p1+9.0);
+	d(2)=(p1+9.0)-11.0;
+	d(3)=698.15-(710.0+u1);
+	d(4)=(710.0+u1)-748.15;
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	p1 = p(1);
+	phi=-1000.0*x2;
+}
+solution_estimate {
+	y0(1)=1.0;
+	y0(2)=0.0;
+}

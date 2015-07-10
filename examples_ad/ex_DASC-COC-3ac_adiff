@@ -1,0 +1,86 @@
+/*
+OPTIMAL TIME ADVANCE IN TERMINAL AREA ARRIVALS: THROUGHPUT VS. FUEL SAVINGS
+
+Alexander V. Sadovsky, Harry N. Swenson, NASA Ames Research Center, Moffett Field, CA 
+William B. Haskell, Department of Industrial Engineering and Operations Research, University of California, Berkeley, CA
+Jasenka Rakas, Civil and Environmental Engineering Department, University of California, Berkeley, CA
+*/
+
+double coeff = 1.0e-5; // 1.0e-5; 1.0e-4; 1.0e-3; 1.0e-2; 1.0e-1; 1.0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5
+int i, j, var_index;
+ADiff t1, running_cost_1, exit_cost;
+output_file = "ex_DASC-COC-3ac_output.data";
+n_states = 4;  // s1, s2, s3, and (an priori unknown) final time t1)
+n_controls = 3;
+n_parameters = 0;
+n_initial = 3;
+n_inequality = 8;
+n_terminal = 1;
+n_nodes = 201;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.e-6;
+//control_type = CONSTANT;
+
+double alpha = 5.e-5;
+double beta = 450.0;
+
+double L1 = 20; // nmi
+double L2 = 30; // nmi
+double L3 = 25; // nmi
+double min_sep = 5.0; // nmi
+double MSL1 = -L1 - 0.0;
+double MSL2 = -L2 - min_sep;
+double MSL3 = -L3 - 2.0*min_sep;
+double s1_0 = -L1 - beta;
+double s2_0 = -L2 - beta;
+double s3_0 = -L3 - beta;
+
+double u1_min = 250; // kn
+double u1_max = 550; // kn
+double u2_min = 250; // kn
+double u2_max = 550; // kn
+double u3_min = 250; // kn
+double u3_max = 550; // kn
+
+initial_constraint {
+	Gamma(1) = y(1) - s1_0;
+	Gamma(2) = y(2) - s2_0;
+	Gamma(3) = y(3) - s3_0;
+}
+
+dynamic_equation_and_cost_function {
+	t1 = y(n_states);
+	for (var_index = 1; var_index <= n_states-1; var_index++) {
+			F(var_index) = t1*u(var_index);
+	}
+	F(n_states) = 0.0;
+
+	//  Running cost: fuel burn
+	running_cost_1 = 1.0 + alpha*pow(u(1) - beta, 2.0) + 1.0 + alpha*pow(u(2) - beta, 2.0) + 1.0 + alpha*pow(u(3) - beta, 2.0);
+	L = coeff * t1 * running_cost_1;
+}
+
+inequality_constraint {
+    d(1) = u(1) - u1_max;
+    d(2) = u1_min - u(1);
+    d(3) = u(2) - u2_max;
+    d(4) = u2_min - u(2);
+    d(5) = u(3) - u3_max;
+    d(6) = u3_min - u(3);
+	d(7) = y(2) + L2;
+	d(8) = y(3) + L3;
+}
+
+terminal_condition {
+	Psi(1) = y(1) - MSL1; 
+	exit_cost = 5.e-1 * ( pow(y(1)-MSL1, 2.0) + pow(y(2)-MSL2, 2.0)  + pow(y(3)-MSL3, 2.0));
+	phi = exit_cost;
+}
+
+solution_estimate {
+    for(j=1;j<n_nodes;j++)
+	    for(i=1;i<=n_controls;i++)
+		    u0(i,j) = 450.0;
+}
+

@@ -1,0 +1,73 @@
+/*
+Maurer, H. and Gillessen, W., Application of Multiple Shooting to the 
+Numerical Solution of Optimal Control Problems with Bounded State Variables, 
+ {\it Computing}, Vol. 15, pp. 105--126, 1975.
+*/
+ADiff x1;
+ADiff x2;
+ADiff x3;
+ADiff x4;
+ADiff u1;
+ADiff p1;
+ADiff alpha;
+input_file = "ex66a.data";
+output_file = "ex66b.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 4;
+n_inequality = 4;
+n_terminal = 4;
+n_nodes = 251;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+
+alpha=0.4;
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	p1 = p(1);
+	Gamma(1)=x1;
+	Gamma(2)=x2;
+	Gamma(3)=x3;
+	Gamma(4)=x4;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	u1 = u(1);
+	p1 = p(1);
+	F(1)=x2*(p1+10.0);
+	F(2)=(-x1+u1)*(p1+10.0);
+	F(3)=x4*(p1+10.0);
+	F(4)=u1*(p1+10.0);
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	u1 = u(1);
+	p1 = p(1);
+	d(1)=-(p1+10.0);
+	d(2)=u1-1.0;
+	d(3)=-1.0-u1;
+	d(4)=(x4-alpha);
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	p1 = p(1);
+	Psi(1)=x1;
+	Psi(2)=x2;
+	Psi(3)=x3-1.0;
+	Psi(4)=x4;
+	phi=(p1+10.0);
+}

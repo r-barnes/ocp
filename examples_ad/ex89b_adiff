@@ -1,0 +1,147 @@
+/*
+
+*/
+n_states 		= 5;
+n_controls 		= 3;
+n_parameters 	= 0;
+n_initial 		= 3;
+n_inequality 	= 3;
+n_terminal 		= 3;
+n_nodes 		= 101;
+initial_time 	= 0.0;
+final_time 		= 1.0;
+tolerance 		= 1.0e-6;
+input_file 		= "ex89a.data";
+output_file 	= "ex89b.data";
+//control_type 	= CUBIC; // LINEAR; // CONSTANT;
+//nlp_method 	= LinfSQPmethod; 	// L1SQPmethod;
+//display 		= YES;				// NO;
+//derivative 	= ANALYTICAL; 		// FORWARD_DIFFERENCE;
+
+initial_constraint {
+    Gamma(1) = y(1);
+	Gamma(2) = y(2);
+	Gamma(3) = y(3);
+}
+/*
+derivative_initial_constraint {
+	DGammay(1,1) = 1.0; 
+	DGammay(2,2) = 1.0; 
+	DGammay(3,3) = 1.0;
+}
+*/
+dynamic_equation_and_cost_function {
+	F(1) = u(1)*cos(y(4))*cos(y(5));
+	F(2) = u(1)*cos(y(4))*sin(y(5));
+	F(3) = u(1)*sin(y(4));
+	F(4) = u(2);
+	F(5) = u(3);
+	L = 0;
+	int i;
+	for (i = 1; i <= n_states; i++) {
+		L += y(i)*y(i);
+	}
+	for (i = 1; i <= n_controls; i++) {
+		L += u(i)*u(i);
+	}
+	L *= 0.5;
+}
+/*
+derivative_dynamic_equation_and_cost_function {
+	DFy(1,4) = -u(1)*sin(y(4))*cos(y(5));
+	DFy(1,5) = -u(1)*cos(y(4))*sin(y(5));
+	DFy(2,4) = -u(1)*sin(y(4))*sin(y(5));
+	DFy(2,5) = u(1)*cos(y(4))*cos(y(5));
+	DFy(3,4) = u(1)*cos(y(4));
+	
+	DFu(1,1) = cos(y(4))*cos(y(5));
+	DFu(2,1) = cos(y(4))*sin(y(5));
+	DFu(3,1) = sin(y(4));
+	DFu(4,2) = 1.0; 
+	DFu(5,3) = 1.0;
+	
+	DLy(1) = y(1); 
+	DLy(2) = y(2); 
+	DLy(3) = y(3); 
+	DLy(4) = y(4); 
+	DLy(5) = y(5);
+	
+	DLu(1) = u(1); 
+	DLu(2) = u(2); 
+	DLu(3) = u(3);
+}
+*/
+inequality_constraint {
+	double xd0 = 2.0;
+	double yd0 = 1.0;
+	double rd  = 1.0;
+	ADiff xd = y(1) - xd0;
+	ADiff yd = y(2) - yd0;
+	ADiff delta_d = sqrt(xd*xd + yd*yd);
+	if (y(3) > 7.0) {
+		rd = 0.0;
+	}
+	d(1) = rd - delta_d;
+	
+	double xe0 = 8.0;
+	double ye0 = 8.0;
+	double re  = 2.0;
+	ADiff xe = y(1) - xe0;
+	ADiff ye = y(2) - ye0;
+	ADiff delta_e = sqrt(xe*xe + ye*ye);
+	if (y(3) > 9.0) {
+		re = 0.0;
+	}
+	d(2) = re - delta_e;
+	
+	d(3) = -u(1);
+}
+/*
+derivative_inequality_constraint {
+	ADiff xd0 = 2.0;
+	ADiff yd0 = 1.0;
+	//ADiff rd  = 1.0;
+	ADiff xd = y(1) - xd0;
+	ADiff yd = y(2) - yd0;
+	ADiff delta_d = pow(xd*xd + yd*yd, -0.5);
+	
+	Ddy(1,1) = -delta_d*xd;
+	Ddy(1,2) = -delta_d*yd;
+	
+	ADiff xe0 = 8.0;
+	ADiff ye0 = 8.0;
+	//ADiff re  = 2.0;
+	ADiff xe = y(1) - xe0;
+	ADiff ye = y(2) - ye0;
+	ADiff delta_e = pow(xe*xe + ye*ye, -0.5);
+	
+	Ddy(2,1) = -delta_e*xe;
+	Ddy(2,2) = -delta_e*ye;
+
+	Ddu(3,1) = -1;
+}
+*/
+terminal_condition {
+	Psi(1) = y(1) - 10.0;
+	Psi(2) = y(2) - 10.0;
+	Psi(3) = y(3) - 10.0;
+}
+/*
+derivative_terminal_condition {
+	DPsiy(1,1) = 1.0; 
+	DPsiy(2,2) = 1.0; 
+	DPsiy(3,3) = 1.0;
+}
+*/
+solution_estimate {
+	y0(1) = 0.0;
+	y0(2) = 0.0;
+	y0(3) = 0.0;
+	int i;
+	for (i = 1; i <= n_nodes; i++) {
+		u0(1,i) = 1.0;
+		u0(2,i) = 0.10;
+		u0(3,i) = 0.10;
+	}
+}
+

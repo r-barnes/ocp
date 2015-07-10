@@ -1,0 +1,59 @@
+/*
+Schwartz, A., {\it Theory and Implementation of Numerical Methods Based on 
+Runge-Kutta Integration for Solving Optimal Control Problems} 
+Ph.D. Thesis, University of California, Berkeley, 1996.
+*/
+ADiff x1;
+ADiff x2;
+ADiff tx;
+ADiff u1;
+output_file = "ex27.data";
+n_states = 3;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 3;
+n_inequality = 4;
+n_terminal = 0;
+n_nodes = 201;
+initial_time = 0.0;
+final_time = 2.9;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	tx = y(3);
+	Gamma(1)=x1-1.0;
+	Gamma(2)=x2-1.0;
+	Gamma(3)=tx;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	tx = y(3);
+	u1 = u(1);
+	F(1)=x2;
+	F(2)=u1-0.1*(1.0+2.0*x1*x1)*x2;
+	F(3)=1.0;
+}
+inequality_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	tx = y(3);
+	u1 = u(1);
+	d(1)=(1.0-9*(x1-1.0)*(x1-1.0)-((x2-0.4)/0.3)*((x2-0.4)/0.3))*(tx.value<1.0?1.0:0.0);
+	d(2)=(-0.8-x2)*(tx.value<1.0?1.0:0.0);
+	d(3)=(u1-1.0)*(tx.value<1.0?1.0:0.0);
+	d(4)=(-1.0-u1)*(tx.value<1.0?1.0:0.0);
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	tx = y(3);
+	phi=5.0*x1*x1+x2*x2;
+}
+solution_estimate {
+	y0(1)=1.0;
+	y0(2)=1.0;
+	y0(3)=0.0;
+}

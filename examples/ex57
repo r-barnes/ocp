@@ -1,0 +1,81 @@
+/*
+ Betts, J. T., Campbell, S. L. and Engelsone, A.,
+Direct transcription solution of optimal control problems with higher order 
+state constraints: theory vs. practice,
+{\it Optimization and Engineering},
+pp. 1--19, vol. 8, 2007.
+*/
+double u1;
+double u2;
+double u3;
+double v;
+double uc;
+double p1;
+double rho;
+double len;
+double vp;
+output_file = "ex57.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 4;
+n_inequality = 1;
+n_terminal = 3;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+rho=1.0;len=0.134;
+
+initial_constraint {
+	u1 = y(1);
+	u2 = y(2);
+	u3 = y(3);
+	v = y(4);
+	p1 = p(1);
+	Gamma(1)=u1;
+	Gamma(2)=u2-1.0;
+	Gamma(3)=u3-2.0;
+	Gamma(4)=v;
+}
+dynamic_equation_and_cost_function {
+	u1 = y(1);
+	u2 = y(2);
+	u3 = y(3);
+	v = y(4);
+	uc = u(1);
+	p1 = p(1);
+	vp=v+p1;
+	F(1)=u2;
+	F(2)=u3;
+	F(3)=vp;
+	F(4)=uc;
+	L=0.5*(rho*(u1-1.0)*(u1-1.0)+vp*vp);
+}
+inequality_constraint {
+	u1 = y(1);
+	u2 = y(2);
+	u3 = y(3);
+	v = y(4);
+	uc = u(1);
+	p1 = p(1);
+	d(1)=u1-len;
+
+}
+terminal_condition {
+	u1 = y(1);
+	u2 = y(2);
+	u3 = y(3);
+	v = y(4);
+	p1 = p(1);
+	Psi(1)=u1;
+	Psi(2)=u2+1.0;
+	Psi(3)=u3-2.0;
+
+}
+solution_estimate {
+	y0(1)=0.0;
+	y0(2)=1.0;
+	y0(3)=2.0;
+	y0(4)=0.0;
+}

@@ -1,0 +1,56 @@
+/*
+
+*/
+n_states = 3;
+n_controls = 2;
+n_parameters = 0;
+n_initial = 3;
+n_inequality = 2;
+n_terminal = 3;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 1.0;
+tolerance = 1.0e-6;
+input_file = "ex88a.data";
+output_file = "ex88b.data";
+//control_type = LINEAR; //CONSTANT;
+//display = YES;
+
+initial_constraint {
+    Gamma(1) = y(1);
+	Gamma(2) = y(2);
+	Gamma(3) = y(3);
+}
+
+dynamic_equation_and_cost_function {
+	F(1) = u(1)*cos(y(3));
+	F(2) = u(1)*sin(y(3));
+	F(3) = u(2);
+	L = 0.5*(y(1)*y(1) + y(2)*y(2) + y(3)*y(3) + u(1)*u(1) + u(2)*u(2));
+}
+
+inequality_constraint {
+	double xd0 = 2.0;
+	double yd0 = 1.0;
+	double rd  = 1.0;
+	double xd = y(1) - xd0;
+	double yd = y(2) - yd0;
+	double delta_d = sqrt(xd*xd + yd*yd);
+	double xe0 = 8.0;
+	double ye0 = 8.0;
+	double re  = 2.0;
+	double xe = y(1) - xe0;
+	double ye = y(2) - ye0;
+	double delta_e = sqrt(xe*xe + ye*ye);	
+	d(1) = rd - delta_d;
+	d(2) = re - delta_e;
+}
+
+terminal_condition {
+	double pi = 3.14159265358979;
+	Psi(1) = y(1) - 10.0;
+	Psi(2) = y(2) - 10.0;
+	Psi(3) = y(3) - 0.5*pi;
+}
+
+

@@ -1,0 +1,46 @@
+/*
+J.SPEYER AND A.BRYSON,JR.,Optimal programming problems with a bounded state space, 
+AIAA J., 6 (1968), pp. 1488-1491.
+*/
+
+output_file = "ex83.data";
+n_states = 4;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 4;
+n_inequality = 1;
+n_terminal = 3;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 3.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	Gamma(1) = y(1) - 1.6;
+	Gamma(2) = y(2) + 1.0;
+	Gamma(3) = y(3);
+	Gamma(4) = y(4);
+}
+
+dynamic_equation_and_cost_function {
+	F(1) = y(2);
+	F(2) = y(3);
+	F(3) = u(1);
+	F(4) = 1.0;
+	L = 0.5*u(1)*u(1);
+}
+
+inequality_constraint {
+    d(1) = -(y(2) - (-4.0*y(4)*y(4) + 12.0*y(4) - 8.0) );
+}
+
+terminal_condition {
+	Psi(1) = y(1);
+	Psi(2) = y(2) + 1.0;
+	Psi(3) = y(3);
+}
+
+solution_estimate {
+	y0(1) = 1.6;
+	y0(2) = -1.0;
+}

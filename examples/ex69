@@ -1,0 +1,42 @@
+double x1;
+double x2;
+double u1;
+output_file = "ex69.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 0;
+n_initial = 2;
+n_inequality = 2;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 12.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	Gamma(1)=x1-1.0;
+	Gamma(2)=x2;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	u1 = u(1);
+	F(1)=u1*(10.0*x2-x1);
+	F(2)=-u1*(10.0*x2-x1)-(1.0-u1)*x2;
+}
+inequality_constraint {
+	u1 = u(1);
+	d(1)=u1-1.0;
+	d(2)=-u1;
+}
+terminal_condition {
+	x1 = y(1);
+	x2 = y(2);
+	phi=-1.0+x1+x2;
+}
+solution_estimate {
+	y0(1)=1.0;
+	y0(2)=0.0;
+}

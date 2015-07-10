@@ -1,0 +1,43 @@
+/*
+Fabien, B. C., Observer-based feedback linearizing control
+of an electromagnetic suspension, {\it ASME Journal of Dynamic Systems
+Measurement and Control}, Vol. 118, 615--619, 1996.
+*/
+double g1, g2;
+n_states = 3;
+n_controls = 1;
+n_parameters = 0;
+n_nodes = 101;
+n_initial = 3;
+n_inequality = 0;
+n_terminal = 2;
+tolerance = 1.0e-6;
+initial_time = 0.0;
+final_time = 1.0;
+output_file = "ex50.data";
+g1 = 1.11;
+g2 = 1.162;
+
+initial_constraint {
+    Gamma(1) = y(1);
+    Gamma(2) = y(2);
+    Gamma(3) = y(3);
+}
+dynamic_equation_and_cost_function {
+    F(1) = y(2);
+    F(2) = 1.0 - g1*g1*(1.0+y(3))*(1.0+y(3))/((g1+y(1))*(g1+y(1)));
+    F(3) = (1.0+y(3))*y(2)/(g1+y(1))
+            -g2*(g1+y(1))*y(3) 
+            +g2*(g1+y(1))*u(1);
+    L = u(1)*u(1);
+}
+terminal_condition {
+    Psi(1) = y(1)-0.1;
+    Psi(2) = y(2);
+}
+solution_estimate {
+    y0(1) = 0.0;
+    y0(2) = 0.0;
+    y0(3) = 0.0;
+}
+

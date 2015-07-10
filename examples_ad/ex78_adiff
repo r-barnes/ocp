@@ -1,0 +1,55 @@
+/*
+AN A PRIORI ESTIMATE FOR DISCRETE APPROXIMATIONS 
+IN NONLINEAR OPTIMAL CONTROL
+ASEN L. DONTCHEV
+SIAM J. CONTROL AND OPTIMIZATION	
+() 1996 Society for Industrial and Applied Mathematics
+Vol. 34, No. 4, pp. 1315-1328, July 1996
+*/
+
+ADiff x1;
+ADiff x2;
+ADiff u1;
+int i;
+output_file = "ex78.data";
+n_states = 2;
+n_controls = 1;
+n_parameters = 1;
+n_initial = 2;
+n_inequality = 1;
+n_terminal = 2;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 2.0;
+tolerance = 1.0e-6;
+
+initial_constraint {
+    x1 = y(1);
+    x2 = y(2);
+    Gamma(1) = x1;
+    Gamma(2) = x2;
+}
+dynamic_equation_and_cost_function {
+    x1 = y(1);
+    x2 = y(2);
+    u1 = u(1);
+    F(1) = x2;
+    F(2) = u1;
+    L = 0.5 * u1 * u1;
+}
+inequality_constraint {
+    x1 = y(1);
+    x2 = y(2);
+    u1 = u(1);
+    d(1) = -u1;
+}
+terminal_condition {
+    x1 = y(1);
+    x2 = y(2);
+    Psi(1) = x1-5.0/6.0;
+    Psi(2) = x2-1.0/2.0;
+}
+solution_estimate {
+    for(i=1;i<n_nodes;i++)
+        u0(1,i) = (i-1.0)/((double)n_nodes);
+}

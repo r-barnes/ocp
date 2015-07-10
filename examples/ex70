@@ -1,0 +1,96 @@
+/*
+Balsa-Canto, M., Banga, J., Alonso, A., and Vassiliadis, V.,
+Dynamic optimization of chemical and biochemical processes using 
+restricted second-order information. 
+{\it Computers and Chemical Engineering}, 
+Vol. 25, pp. 539--546, 2001.
+*/
+double x1;
+double x2;
+double x3;
+double x4;
+double x5;
+double x6;
+double x7;
+double u1;
+double u2;
+double u3;
+double u4;
+double q;
+output_file = "ex70.data";
+n_states = 7;
+n_controls = 4;
+n_parameters = 0;
+n_initial = 7;
+n_inequality = 8;
+n_terminal = 0;
+n_nodes = 101;
+initial_time = 0.0;
+final_time = 0.2;
+tolerance = 1.0e-6;
+
+maximum_iterations = 5000;
+
+initial_constraint {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	x7 = y(7);
+	Gamma(1)=x1-0.1883;
+	Gamma(2)=x2-0.2507;
+	Gamma(3)=x3-0.0467;
+	Gamma(4)=x4-0.0899;
+	Gamma(5)=x5-0.1804;
+	Gamma(6)=x6-0.1394;
+	Gamma(7)=x7-0.1046;
+}
+dynamic_equation_and_cost_function {
+	x1 = y(1);
+	x2 = y(2);
+	x3 = y(3);
+	x4 = y(4);
+	x5 = y(5);
+	x6 = y(6);
+	x7 = y(7);
+	u1 = u(1);
+	u2 = u(2);
+	u3 = u(3);
+	u4 = u(4);
+	q=u1+u2+u4;
+	F(1)=u4-q*x1-17.6*x1*x2-23.0*x1*x6*u3;
+	F(2)=u1-q*x2-17.6*x1*x2-146.0*x2*x3;
+	F(3)=u2-q*x3-73.0*x2*x3;
+	F(4)=-q*x4+35.2*x1*x2-51.3*x4*x5;
+	F(5)=-q*x5+219.0*x2*x3-51.3*x4*x5;
+	F(6)=-q*x6+102.6*x4*x5-23.0*x1*x6*u3;
+	F(7)=-q*x7+46.0*x1*x6*u3;
+	q=u1+u2+u4;
+	L=-(5.8*(q*x1-u4)-3.7*u1-4.1*u2
+	    +q*(23.0*x4+11.0*x5+28.0*x6+35.0*x7)-5.0*u3*u3-0.099);
+}
+inequality_constraint {
+	u1 = u(1);
+	u2 = u(2);
+	u3 = u(3);
+	u4 = u(4);
+	d(1)=u1-20.0;
+	d(2)=-u1;
+	d(3)=u2-6.0;
+	d(4)=-u2;
+	d(5)=u3-4.0;
+	d(6)=-u3;
+	d(7)=u4-20.0;
+	d(8)=-u4;
+}
+solution_estimate {
+	y0(1)=0.1883;
+	y0(2)=0.2507;
+	y0(3)=0.0467;
+	y0(4)=0.0899;
+	y0(5)=0.1804;
+	y0(6)=0.1394;
+	y0(7)=0.1046;
+}
