@@ -1,12 +1,54 @@
-echo "$ Problem: $1"
-#echo "Form the c file ..."
-cat ../src/_ocp_template_c_ > $1OCP.c
-cat $1 >> $1OCP.c
-echo } >> $1OCP.c
-#echo "Compile and link ..."
-cc -O3 -Wall -o $1OCP.exe $1OCP.c ../lib/*.o -lc -lm
-#cc -g -Wall -o $1OCP.exe $1OCP.c ../lib/*.o -lc -lm
-#echo "Execute ..."
-./$1OCP.exe
-#rm $1OCP.c
-rm $1OCP.exe
+#!/bin/bash
+
+#Get absolute location of the runOCP script
+my_loc=$(dirname "$(readlink -f "$0")")
+
+usage="$(basename "$0") [-h] [-g] <OCP File> -- Compile and run an OCP problem
+
+where:
+    -h  show this help text
+    -g  compile with debugging on"
+
+echo "$my_loc"
+
+debug="-O3"
+while getopts ':hg' option; do
+  case "$option" in
+    h) echo "$usage"
+       exit
+       ;;
+    g) debug="-g"
+       ;;
+   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit 1
+       ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+#No command line arguments: output help text
+if [ $# -eq 0 ]; then
+  echo "$usage"
+fi
+
+#Check if the script the user wants to run exists
+if [ ! -e "$1" ]
+then
+  echo "'$1' does not exist!"
+  exit
+fi
+
+#Check if a compiled copy of the script exists. If it doesn't make it.
+if [ "$1" -nt "/tmp/$1OCP.exe" ]; then
+  echo "Building program"
+  cat $my_loc/../src/_ocp_template_c_ > /tmp/$1OCP.c
+  cat $1 >> /tmp/$1OCP.c
+  echo } >> /tmp/$1OCP.c
+  echo "Compiling program"
+  c++ $debug -Wall -I $my_loc/../src/ -o /tmp/$1OCP.exe /tmp/$1OCP.c $my_loc/../src/*.o -lc -lm
+else
+  echo "Using cached version of program"
+fi
+
+/tmp/$1OCP.exe
