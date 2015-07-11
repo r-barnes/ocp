@@ -80,14 +80,14 @@
 #define Do(i,j,k) for(i=(j);i<=(k);i++)
 #define Double(x) ((double)(x))
 
-void   evaluate_gamma(Vector y, Vector p, Vector Gamma);
-double evaluate_fL(Vector y, Vector u, Vector p, double _t, Vector f);
-void   evaluate_d(Vector y, Vector u, Vector p, double _t, Vector d);
+void   evaluate_gamma  (Vector y, Vector p, Vector Gamma);
+double evaluate_fL     (Vector y, Vector u, Vector p, double _t, Vector f);
+void   evaluate_d      (Vector y, Vector u, Vector p, double _t, Vector d);
 double evaluate_phi_psi(Vector y, Vector p, Vector Psi);
 
-void evaluate_Dd(Vector y, Vector u, Vector p, double _t, Matrix dy, Matrix du, Matrix dp);
-void evaluate_Dgamma(Vector y, Vector p, Matrix Gy, Matrix Gp);
-void evaluate_DfL(Vector y, Vector u, Vector p, double _t, Matrix fy, Matrix fu, Matrix fp, Vector Ly, Vector Lu, Vector Lp);
+void evaluate_Dd       (Vector y, Vector u, Vector p, double _t, Matrix dy, Matrix du, Matrix dp);
+void evaluate_Dgamma   (Vector y, Vector p, Matrix Gy, Matrix Gp);
+void evaluate_DfL      (Vector y, Vector u, Vector p, double _t, Matrix fy, Matrix fu, Matrix fp, Vector Ly, Vector Lu, Vector Lp);
 void evaluate_Dphi_Dpsi(Vector y, Vector p, Vector phiy, Vector phip, Matrix Psiy, Matrix Psip);
 
 void get_data(int _mode);
@@ -95,34 +95,34 @@ int  check_data();
 void solve_ocp();
 int _remesh_(RKOCP r0);
 
-int n_nodes = 0;
-int n_states = 0;
-int n_controls = 0;
+int n_nodes      = 0;
+int n_states     = 0;
+int n_controls   = 0;
 int n_parameters = 0;
-int n_terminal = 0;
-int n_initial = 0;
+int n_terminal   = 0;
+int n_initial    = 0;
 int n_inequality = 0;
 
 double initial_time = 0.0;
-double final_time = 1.0;
+double final_time   = 1.0;
 
-int maximum_remesh = 0;
-int maximum_nodes = 500;
-int maximum_iterations = 2000;
-int control_type = CONSTANT; // CONSTANT; // LINEAR; // CUBIC;
-int runge_kutta_method = DormandPrince8_7; // DormandPrince8_7; // DormandPrince8_7; // DormandPrince5_4;
-int derivative = FORWARD_DIFFERENCE; // ANALYTICAL;
-int display = NO;  // NO; // YES;
-double tolerance = 1.0e-6;
+int maximum_remesh        = 0;
+int maximum_nodes         = 500;
+int maximum_iterations    = 2000;
+int control_type          = CONSTANT; // CONSTANT; // LINEAR; // CUBIC;
+int runge_kutta_method    = DormandPrince8_7; // DormandPrince8_7; // DormandPrince8_7; // DormandPrince5_4;
+int derivative            = FORWARD_DIFFERENCE; // ANALYTICAL;
+int display               = NO;  // NO; // YES;
+double tolerance          = 1.0e-6;
 enum NLPmethod nlp_method = L1SQPmethod; // LinfSQPmethod; // L1SQPmethod;
 
-double *_f = NULL;
+double *_f     = NULL;
 double *_gamma = NULL;
-double *_d = NULL;
-double *_psi = NULL;
-double *_y = NULL;
-double *_u = NULL;
-double *_p = NULL;
+double *_d     = NULL;
+double *_psi   = NULL;
+double *_y     = NULL;
+double *_u     = NULL;
+double *_p     = NULL;
 
 double **_dfy = NULL;
 double **_dfu = NULL;
@@ -146,18 +146,18 @@ double *_dLu = NULL;
 double *_dLp = NULL;
 
 double phi = 0.0;
-double L = 0.0;
-double t = 0.0;
+double L   = 0.0;
+double t   = 0.0;
 
-char *input_file = NULL;
+char *input_file  = NULL;
 char *output_file = "ocp.data";
 
-FILE *_input_file_id = NULL;
+FILE *_input_file_id  = NULL;
 FILE *_output_file_id = NULL;
 
-double *_y0 = NULL;
+double *_y0  = NULL;
 double **_u0 = NULL;
-double *_p0 = NULL;
+double *_p0  = NULL;
 
 int _mesh_count = 0;
 
@@ -318,25 +318,25 @@ void solve_ocp() {
     RKOCP r = NULL;
     int i, j, error = 0;
 
-    o = OCPNew();
-    o->n_states = n_states;
-    o->n_controls = n_controls;
+    o               = OCPNew();
+    o->n_states     = n_states;
+    o->n_controls   = n_controls;
     o->n_parameters = n_parameters;
 
-    o->n_initial = n_initial;
-    o->n_terminal = n_terminal;
+    o->n_initial    = n_initial;
+    o->n_terminal   = n_terminal;
     o->n_inequality = n_inequality;
 
     o->differential_equations = evaluate_fL;
-    o->initial_constraints = evaluate_gamma;
+    o->initial_constraints    = evaluate_gamma;
     o->inequality_constraints = evaluate_d;
-    o->terminal_constraints = evaluate_phi_psi;
+    o->terminal_constraints   = evaluate_phi_psi;
 
     if (derivative == ANALYTICAL) {
         o->Ddifferential_equations = evaluate_DfL;
-        o->Dinitial_constraints = evaluate_Dgamma;
+        o->Dinitial_constraints    = evaluate_Dgamma;
         o->Dinequality_constraints = evaluate_Dd;
-        o->Dterminal_constraints = evaluate_Dphi_Dpsi;
+        o->Dterminal_constraints   = evaluate_Dphi_Dpsi;
     }
 
     _T = VectorLinspace(initial_time, final_time, n_nodes);
@@ -384,24 +384,24 @@ void solve_ocp() {
     int _n_iter = 0, _n_fun = 0, _n_grad = 0, _n_soc = 0, _n_qp = 0;
     double _clock = 0;
 	do {
-		r = RKOCPNew(o);
+		r                     = RKOCPNew(o);
 		r->runge_kutta_method = runge_kutta_method;
-		r->control_type = control_type;
-		r->tolerance = tolerance;
+		r->control_type       = control_type;
+		r->tolerance          = tolerance;
 		r->maximum_iterations = maximum_iterations;
-		r->display_data = display;
-		r->nlp_method = nlp_method; // L1SQPmethod;
+		r->display_data       = display;
+		r->nlp_method         = nlp_method; // L1SQPmethod;
 
 		start = clock();
 		RKOCPSolve(r, _T, _Y, _U, _P);
 		end = clock();
 
-        _clock += ((double) (end - start)) / CLOCKS_PER_SEC;
+        _clock  += ((double) (end - start)) / CLOCKS_PER_SEC;
         _n_iter += r->nlp_stats.numberOfIterations;
-        _n_fun += r->nlp_stats.numberOfFunctionCalls;
+        _n_fun  += r->nlp_stats.numberOfFunctionCalls;
         _n_grad += r->nlp_stats.numberOfGradientCalls;
-        _n_soc += r->nlp_stats.numberOfSOC;
-        _n_qp += r->nlp_stats.numberOfQPSolves;
+        _n_soc  += r->nlp_stats.numberOfSOC;
+        _n_qp   += r->nlp_stats.numberOfQPSolves;
 
     } while(_remesh_(r));
 
