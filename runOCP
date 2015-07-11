@@ -9,8 +9,6 @@ where:
     -h  show this help text
     -g  compile with debugging on"
 
-echo "$my_loc"
-
 debug="-O3"
 while getopts ':hg' option; do
   case "$option" in
@@ -30,6 +28,7 @@ shift $((OPTIND - 1))
 #No command line arguments: output help text
 if [ $# -eq 0 ]; then
   echo "$usage"
+  exit
 fi
 
 #Check if the script the user wants to run exists
@@ -39,16 +38,21 @@ then
   exit
 fi
 
-#Check if a compiled copy of the script exists. If it doesn't make it.
-if [ "$1" -nt "/tmp/$1OCP.exe" ]; then
+#Get checksum of file so we can see if a compiled version of it exists
+checksum="$(md5sum $1 | cut -d ' ' -f 1)"
+
+echo "Checksum: $checksum"
+
+#Check if a compiled copy of the script exists. If not, then make it.
+if [ ! -e "/tmp/$checksum.exe" ]; then
   echo "Building program"
-  cat $my_loc/../src/_ocp_template_c_ > /tmp/$1OCP.c
-  cat $1 >> /tmp/$1OCP.c
-  echo } >> /tmp/$1OCP.c
+  cat $my_loc/src/_ocp_template_c_ > "/tmp/$checksum.c"
+  cat $1 >> "/tmp/$checksum.c"
+  echo } >> "/tmp/$checksum.c"
   echo "Compiling program"
-  c++ $debug -Wall -I $my_loc/../src/ -o /tmp/$1OCP.exe /tmp/$1OCP.c $my_loc/../src/*.o -lc -lm
+  c++ $debug -Wall -I $my_loc/src/ -o /tmp/$checksum.exe /tmp/$checksum.c $my_loc/src/*.o -lc -lm
 else
   echo "Using cached version of program"
 fi
 
-/tmp/$1OCP.exe
+/tmp/$checksum.exe
