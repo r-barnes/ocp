@@ -50,7 +50,7 @@ if [ ! -e "/tmp/$checksum.exe" ]; then
   cat $1 >> "/tmp/$checksum.c"
   echo } >> "/tmp/$checksum.c"
   echo "Compiling program"
-  c++ $debug -Wall -I $my_loc/src/ -o /tmp/$checksum.exe /tmp/$checksum.c $my_loc/src/*.o -lc -lm
+  g++ $debug -Wall -I $my_loc/src/ -o /tmp/$checksum.exe /tmp/$checksum.c $my_loc/src/*.o -lc -lm --std=c++11
 else
   echo "Using cached version of program"
 fi
