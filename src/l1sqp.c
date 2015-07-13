@@ -53,92 +53,92 @@ L1SQP L1SQPNew(NLP nlp) {
     a = (L1SQP) malloc(sizeof (struct l1sqp_));
 
     // Input
-    
-    a->tolerance = 1.0e-6;      // Convergence tolerance (1.0e-6 default) 
-    a->maximumIterations = 500; // Maximum number of itersations (500 default)
-    a->displayData = NO;        // Display progress of the solver if true
+
+    a->tolerance         = 1.0e-6; // Convergence tolerance (1.0e-6 default)
+    a->maximumIterations = 500;    // Maximum number of itersations (500 default)
+    a->displayData       = NO;     // Display progress of the solver if true
 
     // Input/Output
-    
-    a->x = NULL;        // The optimal parameters: double[n] 
+
+    a->x      = NULL;   // The optimal parameters: double[n]
     a->lambda = NULL;   // Lagrange multipliers associated with the equality constraints: double[m]
-    a->mu = NULL;       // Lagrange multipliers associated with the inequality constraints: double[p]
-    
+    a->mu     = NULL;   // Lagrange multipliers associated with the inequality constraints: double[p]
+
     // Output
-    
-    a->f = 0.0;     // The optimal function value 
-    a->normT = 0.0; // Norm of the gradient of the Lagrangian 
-    a->normc = 0.0; // Norm of the active constraints 
-    a->numberOfIterations = 0;      // Number of iterations performed 
-    a->numberOfFunctionCalls = 0;   // Number of function calls 
-    a->numberOfGradientCalls = 0;   // Number of gradient evaluations performed 
-    a->numberOfRefinements = 0;     // Number of iterative refinements in the QP method
-    a->numberOfQPSolves = 0;        // Number of QP problems solved
-    a->numberOfSOC = 0;             // Number of second-order corrections
+
+    a->f                     = 0.0; // The optimal function value
+    a->normT                 = 0.0; // Norm of the gradient of the Lagrangian
+    a->normc                 = 0.0; // Norm of the active constraints
+    a->numberOfIterations    = 0;   // Number of iterations performed
+    a->numberOfFunctionCalls = 0;   // Number of function calls
+    a->numberOfGradientCalls = 0;   // Number of gradient evaluations performed
+    a->numberOfRefinements   = 0;   // Number of iterative refinements in the QP method
+    a->numberOfQPSolves      = 0;   // Number of QP problems solved
+    a->numberOfSOC           = 0;   // Number of second-order corrections
 
     // Private
-    
-    a->nlp = nlp;           // the NLP problem
-    a->qp = NULL;           // the QP
-    a->rqp = NULL;          // the relaxed QP
-    a->scqp = NULL;         // the SCQP solver
-    a->rscqp = NULL;        // the relaxed SCQP solver
-    a->n = 0;               // # of parameters
-    a->m = 0;               // # equlity constraints
-    a->p = 0;               // # inequlity constraints
-    a->f0 = 0.0;
-    a->rho_hat = 1.0;
-    a->theta0 = 0.0;        // L1 penalty function
-    a->Dtheta = 0.0;        // 1st-order change in the penalty function
-    a->alpha = 0.0;         // search step
-    a->rqpx = NULL;         // x from the relaxed QP
-    a->rqplambda = NULL;    // lambda from the relaxed QP
-    a->rqpmu = NULL;        // mu from the relaxed QP
-    a->d = NULL;            // search direction
-    a->df = NULL;           // gradient of the function
-    a->h = NULL;            // equality constraints
-    a->g = NULL;            // inequality constraints
-    a->df0 = NULL;          // gradient of the function
-    a->h0 = NULL;           // equality constraints
-    a->g0 = NULL;           // inequality constraints
-    a->kkt = NULL;          // the KKT vector
-    a->Hd = NULL;           // H*d
-    a->d_soc = NULL;        // second-order correction
-    a->H = NULL;            // Hessian
-    a->dh = NULL;           // Jacobian of the equality constraints
-    a->dg = NULL;           // Jacobian of the inequality constraints
-    a->dh0 = NULL;          // Jacobian of the equality constraints
-    a->dg0 = NULL;          // Jacobian of the inequality constraints
-    a->x0 = NULL;           // current solution
-    a->rho = NULL;          // penalty weights
-    a->_v = NULL;           // BFGS update
-    a->_q = NULL;           // BFGS update
-    a->_Bp = NULL;          // BFGS update
-    a->_r = NULL;           // BFGS update
-    a->tol = 0.0;           // tolerance
-    a->nh = 0.0;            // norm h
-    a->ng = 0.0;            // norm g
-    a->nx = 0.0;            // norm x
-    a->nd = 0.0;            // norm d
-    a->normkkt = 0.0;       // norm of the KKT condition
-    a->nfun = 0;            // # func evaluations
-    a->ngrad = 0;           // # grad evaluations
-    a->niter = 0;           // # of iterations
-    a->nsoc = 0;            // # of second order corrections
-    a->maxIter = 0;
-    a->nrelax = 0;          // # of relaxed QP problems
-    a->code = 0;            // return code
-    a->relaxed = NO;        // is this a relaxed QP?
-    a->do_soc = NO;         // perform second order correction?
-    a->nrefine = 0;         // # of iterrative refinemens in the GI algorithm
-    a->done = NO;
-    a->display = YES;       // show progress of the algorithm?
-    a->fd_gradient = YES;   // use forward difference gradients
+
+    a->nlp         = nlp;    // the NLP problem
+    a->qp          = NULL;   // the QP
+    a->rqp         = NULL;   // the relaxed QP
+    a->scqp        = NULL;   // the SCQP solver
+    a->rscqp       = NULL;   // the relaxed SCQP solver
+    a->n           = 0;      // # of parameters
+    a->m           = 0;      // # equlity constraints
+    a->p           = 0;      // # inequlity constraints
+    a->f0          = 0.0;
+    a->rho_hat     = 1.0;
+    a->theta0      = 0.0;    // L1 penalty function
+    a->Dtheta      = 0.0;    // 1st-order change in the penalty function
+    a->alpha       = 0.0;    // search step
+    a->rqpx        = NULL;   // x from the relaxed QP
+    a->rqplambda   = NULL;   // lambda from the relaxed QP
+    a->rqpmu       = NULL;   // mu from the relaxed QP
+    a->d           = NULL;   // search direction
+    a->df          = NULL;   // gradient of the function
+    a->h           = NULL;   // equality constraints
+    a->g           = NULL;   // inequality constraints
+    a->df0         = NULL;   // gradient of the function
+    a->h0          = NULL;   // equality constraints
+    a->g0          = NULL;   // inequality constraints
+    a->kkt         = NULL;   // the KKT vector
+    a->Hd          = NULL;   // H*d
+    a->d_soc       = NULL;   // second-order correction
+    a->H           = NULL;   // Hessian
+    a->dh          = NULL;   // Jacobian of the equality constraints
+    a->dg          = NULL;   // Jacobian of the inequality constraints
+    a->dh0         = NULL;   // Jacobian of the equality constraints
+    a->dg0         = NULL;   // Jacobian of the inequality constraints
+    a->x0          = NULL;   // current solution
+    a->rho         = NULL;   // penalty weights
+    a->_v          = NULL;   // BFGS update
+    a->_q          = NULL;   // BFGS update
+    a->_Bp         = NULL;   // BFGS update
+    a->_r          = NULL;   // BFGS update
+    a->tol         = 0.0;    // tolerance
+    a->nh          = 0.0;    // norm h
+    a->ng          = 0.0;    // norm g
+    a->nx          = 0.0;    // norm x
+    a->nd          = 0.0;    // norm d
+    a->normkkt     = 0.0;    // norm of the KKT condition
+    a->nfun        = 0;      // # func evaluations
+    a->ngrad       = 0;      // # grad evaluations
+    a->niter       = 0;      // # of iterations
+    a->nsoc        = 0;      // # of second order corrections
+    a->maxIter     = 0;
+    a->nrelax      = 0;      // # of relaxed QP problems
+    a->code        = 0;      // return code
+    a->relaxed     = NO;     // is this a relaxed QP?
+    a->do_soc      = NO;     // perform second order correction?
+    a->nrefine     = 0;      // # of iterrative refinemens in the GI algorithm
+    a->done        = NO;
+    a->display     = YES;    // show progress of the algorithm?
+    a->fd_gradient = YES;    // use forward difference gradients
 
     a->_y = NULL;
     a->_d = NULL;
     a->_L = NULL;
-    
+
     return a;
 }
 
@@ -277,7 +277,7 @@ void L1SQPallocateStorage(L1SQP a) {
     a->scqp = SCQPNew(a->qp); // the SCQP solver
     a->scqp->hessianType = FullHessian; //FullHessian;  InverseLowerCholeskyFactor;
 
-    a->rqp = NULL;          // the relaxed QP    
+    a->rqp = NULL;          // the relaxed QP
     a->rscqp = NULL;        // the relaxed SCQP solver
     a->rqpx = NULL;         // x from the relaxed QP
     a->rqplambda = NULL;    // lambda from the relaxed QP
@@ -399,10 +399,10 @@ void L1SQPdeleteStorage(L1SQP a) {
 
 void L1SQPshowInfo(L1SQP a) {
     if (a->niter == 1) {
-        printf("iter: %4d f: %8.4e |c|: %8.4e\n", 
+        printf("iter: %4d f: %8.4e |c|: %8.4e\n",
                a->niter, a->f, a->normc);
     } else {
-        printf("iter: %4d f: %8.4e |c|: %8.4e |T|: %8.4e\n", 
+        printf("iter: %4d f: %8.4e |c|: %8.4e |T|: %8.4e\n",
                a->niter, a->f, a->normc, a->normT);
     }
 }
@@ -434,8 +434,8 @@ void L1SQPterminate(L1SQP a) {
 }
 
 void L1SQPcomputeSearchDirection(L1SQP a) {
-    
-    int i;   
+
+    int i;
     int err = L1SQPsolveQP(a);
 
     if (a->scqp->refine) {
@@ -463,7 +463,7 @@ void L1SQPcomputeSearchDirection(L1SQP a) {
             }
             return;
         }
-        
+
         VectorSetEqual(a->kkt, a->df);
         if (a->m > 0) { // kkt += dh^T*lambda
             MatrixGemTv(a->kkt, a->dh, a->lambda, 1.0, 1.0);
@@ -471,7 +471,7 @@ void L1SQPcomputeSearchDirection(L1SQP a) {
         if (a->p > 0) { // kkt += dg^T*mu
             MatrixGemTv(a->kkt, a->dg, a->mu, 1.0, 1.0);
         }
-        
+
         if (a->scqp->hessianType == FullHessian) {
             MatrixMultVec(a->Hd, a->H, a->d);
         } else {
@@ -501,13 +501,13 @@ void L1SQPcomputeSearchDirection(L1SQP a) {
             a->Hd->e[i] = -a->kkt->e[i];
         }
     }
-    
+
     a->normkkt = VectorNormInf(a->kkt);
     a->normT = fmax(a->normkkt, a->normc);
 
     // compute theta0, Dtheta, rho
-    
-    L1SQPcomputeDtheta(a); 
+
+    L1SQPcomputeDtheta(a);
 
     // convergence tests
 
@@ -555,7 +555,7 @@ int L1SQPsolveQP(L1SQP a) {
 void L1SQPcomputeDtheta(L1SQP a) {
     double Dt0, Dt1 = 0.0;
     int i;
-    
+
     int m = a->m;
     int p = a->p;
 
@@ -671,7 +671,7 @@ int L1SQPsolveRelaxedQP(L1SQP a) {
             a->rqp->H->e[i][i] = 1.0 / sqrt(beta_hat);
         }
     }
-    
+
     for (i = 0; i < m; i++) {
         gamma = -1.0;
         if (a->h->e[i] < 0.0) {
@@ -684,7 +684,7 @@ int L1SQPsolveRelaxedQP(L1SQP a) {
         a->rqp->b1->e[i] = a->h->e[i];
         a->rqp->A2->e[p + i][n + i] = -1.0;
     }
-    for (i = 0; i < p; i++) {       
+    for (i = 0; i < p; i++) {
         for (j = 0; j < n; j++) {
             a->rqp->A2->e[i][j] = a->dg->e[i][j];
         }
@@ -838,7 +838,7 @@ void L1SQPlineSearch(L1SQP a) {
                 && ((a->normc > nc0) || (nc0 <= a->tol))) {
 
             L1SQPsocStep(a);
-            
+
             n_soc = VectorNorm(a->d_soc);
             if ((n_soc > 10.0 * DBL_EPSILON) && (n_soc < a->nd)) {
                 a->do_soc = YES;
@@ -886,7 +886,7 @@ void L1SQPsocStep(L1SQP a) {
 
     mhat = m + a->scqp->n_active;
 
-    if (mhat < 1) {       
+    if (mhat < 1) {
         return;
     }
 
@@ -898,7 +898,7 @@ void L1SQPsocStep(L1SQP a) {
     for (i = 0; i < a->scqp->n_active; i++) {
         b->e[i + m] = a->g->e[a->scqp->which_constraint[i]];
     }
-    
+
     // form w
     w = VectorNew(mhat);
     Rtranspose = MatrixNew(mhat, mhat);
@@ -956,7 +956,7 @@ void L1SQPsocStep(L1SQP a) {
     if (J2 != NULL) MatrixDelete(J2);
 }
 
-void L1SQPupdate(L1SQP a) {    
+void L1SQPupdate(L1SQP a) {
     double deltaf = fabs(a->f - a->f0);
     //printf("deltaf: %e\n", deltaf);
     if (deltaf <= FAC * (1.0 + fabs(a->f)) && (a->normc <= a->tol)) {
