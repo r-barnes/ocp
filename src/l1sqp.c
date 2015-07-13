@@ -237,11 +237,11 @@ void L1SQPallocateStorage(L1SQP a) {
 
     a->x0 = VectorNew(n);           // current solution
     VectorSetEqual(a->x0, a->x);
-    a->d = VectorNew(n);            // search direction
+    a->d     = VectorNew(n);        // search direction
     a->d_soc = VectorNew(n);        // second-order correction
-    a->kkt = VectorNew(n);          // the KKT vector
+    a->kkt   = VectorNew(n);        // the KKT vector
 
-    a->df = VectorNew(n);           // gradient of the function
+    a->df  = VectorNew(n);          // gradient of the function
     a->df0 = VectorNew(n);          // gradient of the function
 
     a->H = MatrixNew(n, n);         // Hessian
@@ -255,20 +255,20 @@ void L1SQPallocateStorage(L1SQP a) {
         VectorSetAllTo(a->rho, 1.0);
     }
     if (m > 0) {
-        a->h = VectorNew(m);        // equality constraints
-        a->dh = MatrixNew(m, n);    // Jacobian of the equality constraints
-        a->h0 = VectorNew(m);       // equality constraints
+        a->h   = VectorNew(m);      // equality constraints
+        a->dh  = MatrixNew(m, n);   // Jacobian of the equality constraints
+        a->h0  = VectorNew(m);      // equality constraints
         a->dh0 = MatrixNew(m, n);   // Jacobian of the equality constraints
     }
     if (p > 0) {
-        a->g = VectorNew(p);        // inequality constraints
-        a->g0 = VectorNew(p);       // inequality constraints
-        a->dg = MatrixNew(p, n);    // Jacobian of the inequality constraints
+        a->g   = VectorNew(p);      // inequality constraints
+        a->g0  = VectorNew(p);      // inequality constraints
+        a->dg  = MatrixNew(p, n);   // Jacobian of the inequality constraints
         a->dg0 = MatrixNew(p, n);   // Jacobian of the inequality constraints
     }
-    a->qp = QPNew(); // the QP
-    a->qp->H = a->H;
-    a->qp->c = a->df;
+    a->qp     = QPNew(); // the QP
+    a->qp->H  = a->H;
+    a->qp->c  = a->df;
     a->qp->A1 = a->dh;
     a->qp->b1 = a->h;
     a->qp->A2 = a->dg;
@@ -277,21 +277,21 @@ void L1SQPallocateStorage(L1SQP a) {
     a->scqp = SCQPNew(a->qp); // the SCQP solver
     a->scqp->hessianType = FullHessian; //FullHessian;  InverseLowerCholeskyFactor;
 
-    a->rqp = NULL;          // the relaxed QP
-    a->rscqp = NULL;        // the relaxed SCQP solver
-    a->rqpx = NULL;         // x from the relaxed QP
+    a->rqp       = NULL;    // the relaxed QP
+    a->rscqp     = NULL;    // the relaxed SCQP solver
+    a->rqpx      = NULL;    // x from the relaxed QP
     a->rqplambda = NULL;    // lambda from the relaxed QP
-    a->rqpmu = NULL;        // mu from the relaxed QP
+    a->rqpmu     = NULL;    // mu from the relaxed QP
 
-    a->_v = VectorNew(n);   // BFGS update
-    a->_q = VectorNew(n);   // BFGS update
-    a->_Bp = VectorNew(n);  // BFGS update
-    a->_r = VectorNew(n);   // BFGS update
+    a->_v  = VectorNew(n);   // BFGS update
+    a->_q  = VectorNew(n);   // BFGS update
+    a->_Bp = VectorNew(n);   // BFGS update
+    a->_r  = VectorNew(n);   // BFGS update
 
-    a->nfun = 0;
-    a->ngrad = 0;
-    a->nsoc = 0;
-    a->nrelax = 0;
+    a->nfun    = 0;
+    a->ngrad   = 0;
+    a->nsoc    = 0;
+    a->nrelax  = 0;
     a->nrefine = 0;
 
     a->f = a->nlp->fhg(a->x0, a->h, a->g);
@@ -317,15 +317,15 @@ void L1SQPallocateStorage(L1SQP a) {
         a->ng = fmax(0.0, VectorMax(a->g));
     }
     a->rho_hat = 1.0;
-    a->theta0 = 0;
-    a->Dtheta = 0;
-    a->normc = fmax(a->nh, a->ng);
-    a->done = NO;
-    a->code = 0;
+    a->theta0  = 0;
+    a->Dtheta  = 0;
+    a->normc   = fmax(a->nh, a->ng);
+    a->done    = NO;
+    a->code    = 0;
 
-    a->_y = VectorNew(n);
-    a->_d = VectorNew(n);
-    a->_L = MatrixNew(n, n);
+    a->_y  = VectorNew(n);
+    a->_d  = VectorNew(n);
+    a->_L  = MatrixNew(n, n);
     a->_Li = MatrixNew(n, n);
     for (i = 0; i < n; i++) {
         a->_Li->e[i][i] = 1.0;
@@ -703,26 +703,26 @@ void L1SQPcomputeDthetaRelaxed(L1SQP a) {
 
     double *d = a->d->e;
 
-    double *rho = NULL;
-    double *h = NULL;
-    double *g = NULL;
+    double *rho    = NULL;
+    double *h      = NULL;
+    double *g      = NULL;
     double *lambda = NULL;
-    double *mu = NULL;
+    double *mu     = NULL;
 
-    double *rqpx = a->rqpx->e;
+    double *rqpx      = a->rqpx->e;
     double *rqplambda = NULL;
-    double *rqpmu = NULL;
+    double *rqpmu     = NULL;
 
     if (m > 0) {
-        rho = a->rho->e;
-        h = a->h->e;
-        lambda = a->lambda->e;
+        rho       = a->rho->e;
+        h         = a->h->e;
+        lambda    = a->lambda->e;
         rqplambda = a->rqplambda->e;
     }
     if (p > 0) {
-        rho = a->rho->e;
-        g = a->g->e;
-        mu = a->mu->e;
+        rho   = a->rho->e;
+        g     = a->g->e;
+        mu    = a->mu->e;
         rqpmu = a->rqpmu->e;
     }
     // copy d, lambda, mu
@@ -1020,23 +1020,25 @@ void L1SQPupdate(L1SQP a) {
 }
 
 void L1SQPBFGSupdate(L1SQP a) {
-    int n = a->n, m = a->m, p = a->p;
-    double *v = a->_v->e;
-    double *q = a->_q->e;
-    double *Bp = a->_Bp->e;
-    double *r = a->_r->e;
-    double *x = a->x->e;
-    double *x0 = a->x0->e;
-    double *df = a->df->e;
-    double *df0 = a->df0->e;
-    double **H = a->H->e;
+    int n          = a->n;
+    int m          = a->m;
+    int p          = a->p;
+    double *v      = a->_v->e;
+    double *q      = a->_q->e;
+    double *Bp     = a->_Bp->e;
+    double *r      = a->_r->e;
+    double *x      = a->x->e;
+    double *x0     = a->x0->e;
+    double *df     = a->df->e;
+    double *df0    = a->df0->e;
+    double **H     = a->H->e;
     double *lambda = NULL;
-    double *mu = NULL;
-    double **dh = NULL;
-    double **dh0 = NULL;
-    double **dg = NULL;
-    double **dg0 = NULL;
-    double *Hi = NULL;
+    double *mu     = NULL;
+    double **dh    = NULL;
+    double **dh0   = NULL;
+    double **dg    = NULL;
+    double **dg0   = NULL;
+    double *Hi     = NULL;
 
     double dL0, dL1;
     double s0, s1;
