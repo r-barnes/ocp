@@ -1,15 +1,21 @@
 #!/bin/bash
 
-#Get absolute location of the runOCP script
+#Get absolute location of the runOCP script, which will be useful for finding
+#compilation dependencies
 my_loc=$(dirname "$(readlink -f "$0")")
 
+#Usage text for when inputs are invalid or the user needs help
 usage="$(basename "$0") [-h] [-g] <OCP File> -- Compile and run an OCP problem
 
 where:
     -h  show this help text
     -g  compile with debugging on"
 
+#By default, compile the script with full optimizations
 debug="-O3"
+
+#Process command line options. This will strip the options off leaving only
+#positional arguments behind
 while getopts ':hg' option; do
   case "$option" in
     h) echo "$usage"
@@ -38,21 +44,30 @@ then
   exit
 fi
 
-#Get checksum of file so we can see if a compiled version of it exists
+#Get checksum of the script so we can see if a compiled version of it exists
 checksum="$(md5sum $1 | cut -d ' ' -f 1)"
 
+#Echo the checksum for kicks
 echo "Checksum: $checksum"
 
 #Check if a compiled copy of the script exists. If not, then make it.
 if [ ! -e "/tmp/$checksum.exe" ]; then
   echo "Building program"
+
+  #This is the header part of the script through the main function. We will
+  #append the user's script to it.
   cat $my_loc/src/_ocp_template_c_ > "/tmp/$checksum.c"
+  #The user's script defines various code blocks used to express the problem.
+  #These are all nested in the solveOCP() function
   cat $1 >> "/tmp/$checksum.c"
+  #This ends the solveOCP() function
   echo } >> "/tmp/$checksum.c"
+  #Compile the combined script into an executable
   echo "Compiling program"
   g++ $debug -Wall -I $my_loc/src/ -o /tmp/$checksum.exe /tmp/$checksum.c $my_loc/src/*.o -lc -lm --std=c++11
 else
   echo "Using cached version of program"
 fi
 
+#Run the executable in order to solve the problem
 /tmp/$checksum.exe
