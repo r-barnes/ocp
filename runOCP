@@ -9,19 +9,23 @@ usage="$(basename "$0") [-h] [-g] <OCP File> -- Compile and run an OCP problem
 
 where:
     -h  show this help text
-    -g  compile with debugging on"
+    -g  compile with debugging on
+    -r  rebuild the program"
 
 #By default, compile the script with full optimizations
 debug="-O3"
+rebuild=0
 
 #Process command line options. This will strip the options off leaving only
 #positional arguments behind
-while getopts ':hg' option; do
+while getopts ':hgr' option; do
   case "$option" in
     h) echo "$usage"
        exit
        ;;
     g) debug="-g"
+       ;;
+    r) rebuild=1
        ;;
    \?) printf "illegal option: -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -51,7 +55,7 @@ checksum="$(md5sum $1 | cut -d ' ' -f 1)"
 echo "Checksum: $checksum"
 
 #Check if a compiled copy of the script exists. If not, then make it.
-if [ ! -e "/tmp/$checksum.exe" ]; then
+if [ \( ! -e "/tmp/$checksum.exe" \) -o  \( $rebuild -eq 1 \) ]; then
   echo "Building program"
 
   #This is the header part of the script through the main function. We will
