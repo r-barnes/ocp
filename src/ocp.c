@@ -457,37 +457,39 @@ int OCPWriteData(OCP o, FILE *file_id,
         return -1;
     }
     n_nodes = T->r;
-    fprintf(file_id, "n_states\n%d\n", o->n_states);
-    fprintf(file_id, "n_controls\n%d\n", o->n_controls);
-    fprintf(file_id, "n_parameters\n%d\n", o->n_parameters);
-    fprintf(file_id, "n_initial\n%d\n", o->n_initial);
-    fprintf(file_id, "n_terminal\n%d\n", o->n_terminal);
-    fprintf(file_id, "n_inequality\n%d\n", o->n_inequality);
-    fprintf(file_id, "n_nodes\n%d\n", n_nodes);
-    fprintf(file_id, "tolerance\n%e\n", tol);
-    fprintf(file_id, "control_type\n%d\n", control_type);
-    fprintf(file_id, "T\n");
-    for (i = 0; i < n_nodes; i++)
-        fprintf(file_id, "%g ", T->e[i]);
-    fprintf(file_id, "\n");
-    fprintf(file_id, "Y\n");
-    for (i = 0; i < o->n_states; i++) {
-        for (j = 0; j < n_nodes; j++)
-            fprintf(file_id, "%e ", Y->e[j][i]);
-        fprintf(file_id, "\n");
-    }
-    //fprintf(file_id, "\n");
-    fprintf(file_id, "U\n");
-    for (i = 0; i < o->n_controls; i++) {
-        for (j = 0; j < n_nodes; j++)
-            fprintf(file_id, "%e ", U->e[j][i]);
-        fprintf(file_id, "\n");
-    }
-    //fprintf(file_id, "\n");
-    fprintf(file_id, "P\n");
+    fprintf(file_id, "#n_states:     %d\n", o->n_states);
+    fprintf(file_id, "#n_controls:   %d\n", o->n_controls);
+    fprintf(file_id, "#n_parameters: %d\n", o->n_parameters);
+    fprintf(file_id, "#n_initial:    %d\n", o->n_initial);
+    fprintf(file_id, "#n_terminal:   %d\n", o->n_terminal);
+    fprintf(file_id, "#n_inequality: %d\n", o->n_inequality);
+    fprintf(file_id, "#n_nodes:      %d\n", n_nodes);
+    fprintf(file_id, "#tolerance:    %e\n", tol);
+    fprintf(file_id, "#control_type: %d\n", control_type);
+
+    fprintf(file_id, "#T\t");
+    for (i = 0; i < o->n_states; i++)
+        fprintf(file_id, "Y%d\t", i);
+    for (i = 0; i < o->n_controls; i++)
+        fprintf(file_id, "U%d\t", i);
     for (i = 0; i < o->n_parameters; i++)
-        fprintf(file_id, "%e ", P->e[i]);
+        fprintf(file_id, "P%d\t", i);
     fprintf(file_id, "\n");
+
+    for (j = 0; j < n_nodes; j++){
+        //Time
+        fprintf(file_id, "%g\t", T->e[j]);
+        //States
+        for (i = 0; i < o->n_states; i++)
+            fprintf(file_id, "%e\t", Y->e[j][i]);
+        //Controls
+        for (i = 0; i < o->n_controls; i++)
+            fprintf(file_id, "%e\t", U->e[j][i]);
+        //Parameters
+        for (i = 0; i < o->n_parameters; i++)
+            fprintf(file_id, "%e\t", P->e[i]);
+        fprintf(file_id, "\n");
+    }
 
     fclose(file_id);
 
