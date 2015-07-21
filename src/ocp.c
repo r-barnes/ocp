@@ -27,12 +27,12 @@ void _OCPFd(Vector x, Vector F);
 //
 // Public members:
 //
-//    int n_states;       // Number of states > 0  
+//    int n_states;       // Number of states > 0
 //    int n_controls;     // Number of controls >= 0
-//    int n_parameters;   // Number of parameters >= 0 
-//    int n_initial;      // Number of initial conditions >= 0 
-//    int n_terminal;     // Number of terminal conditions >= 0 
-//    int n_inequality;   // Number of inequality constraints >= 0 
+//    int n_parameters;   // Number of parameters >= 0
+//    int n_initial;      // Number of initial conditions >= 0
+//    int n_terminal;     // Number of terminal conditions >= 0
+//    int n_inequality;   // Number of inequality constraints >= 0
 //    void (*initial_constraints)(Vector y, Vector p, Vector Gamma);  // Computer Gamma(y,p)
 //    double (*terminal_constraints)(Vector y, Vector p, Vector Psi); // Compute phi, Psi
 //    void (*inequality_constraints)(Vector y, Vector u, Vector p,

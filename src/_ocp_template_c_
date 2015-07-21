@@ -166,8 +166,8 @@ Matrix _Y = NULL, _U = NULL;
 
 void evaluate_gamma(Vector y, Vector p, Vector Gamma) {
     _y = y->e;
-    if (n_parameters > 0) _p = p->e;
-    if (n_initial > 0) _gamma = Gamma->e;
+    if (n_parameters > 0) _p     = p->e;
+    if (n_initial > 0)    _gamma = Gamma->e;
     get_data(EVAL_GAMMA);
 }
 
@@ -189,7 +189,7 @@ double evaluate_fL(Vector y, Vector u, Vector p, double _t, Vector f) {
     L = 0.0;
     t = _t;
     _y = y->e;
-    if (n_controls > 0)_u = u->e;
+    if (n_controls > 0)   _u = u->e;
     if (n_parameters > 0) _p = p->e;
     _f = f->e;
     get_data(EVAL_FL);
@@ -202,12 +202,12 @@ void evaluate_DfL(Vector y, Vector u, Vector p, double _t,
     t = _t;
     _y = y->e;
     if (n_controls > 0) {
-        _u = u->e;
+        _u   = u->e;
         _dfu = fu->e;
         _dLu = Lu->e;
     }
     if (n_parameters > 0) {
-        _p = p->e;
+        _p   = p->e;
         _dfp = fp->e;
         _dLp = Lp->e;
     }
@@ -219,7 +219,7 @@ void evaluate_DfL(Vector y, Vector u, Vector p, double _t,
 void evaluate_d(Vector y, Vector u, Vector p, double _t, Vector d) {
     t = _t;
     _y = y->e;
-    if (n_controls > 0) _u = u->e;
+    if (n_controls > 0)   _u = u->e;
     if (n_parameters > 0) _p = p->e;
     if (n_inequality > 0) _d = d->e;
     get_data(EVAL_D);
@@ -229,11 +229,11 @@ void evaluate_Dd(Vector y, Vector u, Vector p, double _t, Matrix dy, Matrix du, 
     t = _t;
     _y = y->e;
     if (n_controls > 0) {
-        _u = u->e;
+        _u   = u->e;
         _ddu = du->e;
     }
     if (n_parameters > 0) {
-        _p = p->e;
+        _p   = p->e;
         _ddp = dp->e;
     }
     _ddy = dy->e;
